@@ -7,17 +7,19 @@ An LLM agent that turns a batch of security logs into a short list of explained 
 ## Eval results
 
 <!-- EVAL_RESULTS_START -->
-| Metric | Sigma-style rules | LLM agent | Target |
+| Metric | Sigma-style rules | LLM agent (qwen2.5:3b) | Target |
 | --- | ---: | ---: | ---: |
-| Detection recall | 56% | not run yet |  |
-| Detection precision | 65% | not run yet |  |
-| Severity accuracy | 56% | not run yet | ≥ 75% |
-| ATT&CK tactic accuracy | 56% | not run yet | ≥ 70% |
-| ATT&CK technique accuracy | 56% | not run yet | ≥ 65% |
-| False positives on benign activity | 13 of 24 | not run yet | |
-| Detection recall on evasive attacks | 0% | not run yet | |
+| Detection recall | 56% | 60% |  |
+| Detection precision | 65% | 81% |  |
+| Severity accuracy | 56% | 33% | ≥ 75% |
+| ATT&CK tactic accuracy | 56% | 51% | ≥ 70% |
+| ATT&CK technique accuracy | 56% | 49% | ≥ 65% |
+| False positives on benign activity | 13 of 24 | 6 of 24 | |
+| Detection recall on evasive attacks | 0% | 47% | |
+| Latency p95 per analysis | 0.6 ms | 184.2 s | < 10 s |
+| LLM cost per analysis | $0 | $0.0000 | |
 
-67 labelled entries: 43 attacks and 24 benign, 15 of them held out. Accuracy is over the attack entries, and a missed attack counts as wrong. The agent column fills in once the eval suite runs with an LLM API key.
+67 labelled entries: 43 attacks and 24 benign, 15 of them held out. Accuracy is over the attack entries, and a missed attack counts as wrong. Agent run: 2026-11-15.
 <!-- EVAL_RESULTS_END -->
 
 The table is generated from [`evals/results.json`](evals/results.json) by `python backend/scripts/update_readme.py`.
