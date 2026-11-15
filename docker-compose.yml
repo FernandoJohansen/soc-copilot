@@ -30,6 +30,9 @@ services:
       REDIS_URL: redis://redis:6379/0
       EVAL_RESULTS_PATH: /evals/results.json
       AUTO_SEED: "true"
+    extra_hosts:
+      # lets the container reach an Ollama server running on the host
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./evals:/evals:ro
     ports:

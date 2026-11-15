@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-sonnet-5-5"
     anthropic_effort: str = "low"
     openai_model: str = "gpt-4o-mini"
+    # Ollama serves an OpenAI-compatible API; no key is needed.
+    ollama_base_url: str = "http://localhost:11434/v1"
+    ollama_model: str = "llama3.1"
     llm_max_tokens: int = 8000
 
     # USD per million tokens; only used to report cost in the evals.

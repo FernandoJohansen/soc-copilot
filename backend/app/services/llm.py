@@ -219,13 +219,14 @@ class OpenAIProvider(LLMProvider):
         import openai
 
         self._openai = openai
+        self._model = settings.openai_model
         self._client = openai.AsyncOpenAI(api_key=settings.openai_api_key or None, timeout=90.0)
 
     async def analyze(self, events_text: str, mitre_context: str) -> LLMResponse:
         openai = self._openai
         try:
             response = await self._client.chat.completions.create(
-                model=settings.openai_model,
+                model=self._model,
                 response_format={"type": "json_object"},
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
@@ -233,13 +234,13 @@ class OpenAIProvider(LLMProvider):
                 ],
             )
         except openai.AuthenticationError as e:
-            raise LLMError("OpenAI rejected the API key.") from e
+            raise LLMError(f"{self.name} rejected the API key.") from e
         except openai.RateLimitError as e:
-            raise LLMError("OpenAI rate limit reached.") from e
+            raise LLMError(f"{self.name} rate limit reached.") from e
         except openai.APIStatusError as e:
-            raise LLMError(f"OpenAI API error {e.status_code}: {e.message}") from e
+            raise LLMError(f"{self.name} API error {e.status_code}: {e.message}") from e
         except openai.APIConnectionError as e:
-            raise LLMError("Could not reach the OpenAI API.") from e
+            raise LLMError(f"Could not reach the {self.name} API.") from e
         except openai.OpenAIError as e:
             raise LLMError(str(e)) from e
 
@@ -253,12 +254,34 @@ class OpenAIProvider(LLMProvider):
         )
 
 
-_PROVIDERS: dict[str, type[LLMProvider]] = {"claude": ClaudeProvider, "openai": OpenAIProvider}
+class OllamaProvider(OpenAIProvider):
+    """A local model served by Ollama, through its OpenAI-compatible endpoint."""
+
+    name = "ollama"
+
+    def __init__(self) -> None:
+        import openai
+
+        self._openai = openai
+        self._model = settings.ollama_model
+        # Ollama ignores the key, but the SDK requires one. Local models are slow: long timeout.
+        self._client = openai.AsyncOpenAI(
+            base_url=settings.ollama_base_url, api_key="ollama", timeout=300.0
+        )
+
+
+_PROVIDERS: dict[str, type[LLMProvider]] = {
+    "claude": ClaudeProvider,
+    "openai": OpenAIProvider,
+    "ollama": OllamaProvider,
+}
 _instance: LLMProvider | None = None
 
 
 def llm_configured() -> bool:
     """True when credentials for the selected provider are present."""
+    if settings.llm_provider == "ollama":
+        return True  # local server, no key
     if settings.llm_provider == "openai":
         return bool(settings.openai_api_key or os.getenv("OPENAI_API_KEY"))
     return bool(

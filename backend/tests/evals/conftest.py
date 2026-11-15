@@ -20,5 +20,9 @@ def agent_report(golden):
     reason = harness.agent_unavailable_reason()
     if reason:
         return None
-    model = settings.anthropic_model if settings.llm_provider == "claude" else settings.openai_model
+    model = {
+        "claude": settings.anthropic_model,
+        "openai": settings.openai_model,
+        "ollama": settings.ollama_model,
+    }[settings.llm_provider]
     return harness.report(f"LLM agent ({model})", golden, harness.run_agent(golden))

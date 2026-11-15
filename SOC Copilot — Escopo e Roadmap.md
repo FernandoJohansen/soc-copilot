@@ -110,7 +110,7 @@ O projeto inteiro está nesta pasta (reconstruído aqui a partir deste documento
 6. `python scripts/generate_logs.py` — gera logs sintéticos dos 5 cenários
 7. `uvicorn app.main:app --reload` — sobe a API na porta 8000
 8. Testar: `curl -X POST http://localhost:8000/api/v1/analyze -H 'Content-Type: application/json' -d '{"event_ids": [1,2,3]}'`
-9. Rodar testes: `pytest -v` (36 testes devem passar)
+9. Rodar testes: `pytest -v` (37 testes devem passar)
 10. Rodar evals: `pytest backend/tests/evals -m eval -v` na raiz (gera `evals/results.json`; a parte do agente precisa de API key)
 
 As Fases 1 a 4 estão implementadas. O que falta depende de você: rodar os evals do agente com uma API key, gravar o GIF e fazer o deploy.
@@ -141,7 +141,7 @@ As Fases 1 a 4 estão implementadas. O que falta depende de você: rodar os eval
 | `backend/app/services/sigma_rules.py` | 5 regras determinísticas de detecção |
 | `backend/scripts/generate_logs.py` | Gerador de 5 cenários de logs sintéticos |
 | `backend/scripts/seed_mitre.py` | Seed de 15 técnicas ATT&CK com embeddings |
-| `backend/tests/test_*.py` | 36 testes unitários (schemas, sigma, LLM parsing, health, logs) |
+| `backend/tests/test_*.py` | 37 testes unitários (schemas, sigma, LLM parsing, health, logs) |
 | `backend/app/services/correlation.py` | Agrupa eventos por IP, usuário e janela de tempo |
 | `backend/app/services/analysis.py` | Orquestração: RAG + Sigma + LLM + persistência |
 | `backend/scripts/build_golden.py` | Gera `tests/evals/golden_labels.json` a partir dos geradores |
@@ -212,7 +212,8 @@ Quem for gerar código para as Fases 3 e 4 precisa seguir estes padrões já est
 
 - `DATABASE_URL=postgresql+asyncpg://soc:soc@localhost:5432/soc_copilot`
 - `REDIS_URL=redis://localhost:6379/0`
-- `LLM_PROVIDER=claude` (ou `openai`)
+- `LLM_PROVIDER=claude` (ou `openai`, ou `ollama` para um modelo local, sem API key)
+- `OLLAMA_MODEL=llama3.1` e `OLLAMA_BASE_URL=http://localhost:11434/v1` (só com `ollama`)
 - `ANTHROPIC_API_KEY=sk-ant-...`
 - `OPENAI_API_KEY=sk-...`
 
@@ -289,7 +290,7 @@ soc-copilot/
 │   │   ├── generate_logs.py  # 5 cenários sintéticos
 │   │   └── seed_mitre.py     # 15 técnicas ATT&CK com embeddings
 │   ├── tests/
-│   │   ├── test_*.py         # unitários (36 testes passando)
+│   │   ├── test_*.py         # unitários (37 testes passando)
 │   │   └── evals/            # golden labels + DeepEval
 │   ├── Dockerfile
 │   └── requirements.txt

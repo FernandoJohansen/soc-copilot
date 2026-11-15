@@ -75,3 +75,13 @@ def test_missing_key_is_an_llm_error(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
     with pytest.raises(LLMError, match="No API key"):
         get_llm_provider()
+
+
+def test_ollama_provider_needs_no_key(monkeypatch):
+    monkeypatch.setattr(llm, "_instance", None)
+    monkeypatch.setattr(settings, "llm_provider", "ollama")
+    monkeypatch.setattr(settings, "ollama_model", "qwen2.5:14b")
+    provider = get_llm_provider()
+    assert (provider.name, provider._model) == ("ollama", "qwen2.5:14b")
+    assert str(provider._client.base_url).startswith(settings.ollama_base_url)
+    monkeypatch.setattr(llm, "_instance", None)

@@ -52,7 +52,7 @@ flowchart LR
 | --- | --- |
 | API | FastAPI, SQLAlchemy 2 async, Pydantic v2, Python 3.12 |
 | Storage | PostgreSQL 16 with pgvector (384-dimension `all-MiniLM-L6-v2` embeddings) |
-| LLM | Pluggable provider: Claude (`claude-sonnet-5-5` by default) or OpenAI |
+| LLM | Pluggable provider: Claude (`claude-sonnet-5-5` by default), OpenAI, or a local model through Ollama |
 | Baseline | Five deterministic rules in `backend/app/services/sigma_rules.py` |
 | Frontend | React 18, TypeScript, Vite, Tailwind, React Query |
 | Evals | pytest and DeepEval, run in GitHub Actions |
@@ -68,6 +68,14 @@ docker compose exec api python scripts/generate_logs.py   # load sample logs
 Open the dashboard at <http://localhost:3000>. The API docs are at <http://localhost:8000/docs>.
 
 The MITRE techniques are seeded on first start. Without an API key the stack still runs: the Sigma rules classify the events and the response says the LLM did not answer.
+
+To use a local model instead of a hosted one, run [Ollama](https://ollama.com) on the host and set in `.env`:
+
+```bash
+LLM_PROVIDER=ollama
+OLLAMA_MODEL=llama3.1
+OLLAMA_BASE_URL=http://host.docker.internal:11434/v1   # http://localhost:11434/v1 outside Docker
+```
 
 Then group the sample logs into incidents and analyze each group:
 
@@ -119,7 +127,7 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - **RAG instead of the whole ATT&CK matrix in the prompt.** pgvector returns the five closest techniques. On the golden attacks the right technique is in the top five for 42 of 43 entries and in the top three for 34, which is why the default is five.
 - **A written severity policy.** One four-level policy (`backend/app/services/severity.py`) is shared by the rules, the prompt and the labels, so a severity disagreement is a judgement about the events and not about the scale.
 - **The agent can say "not an incident".** Benign entries make up a third of the dataset, so false positives are measured and not assumed away.
-- **Pluggable provider.** `LLM_PROVIDER` switches between Claude and OpenAI behind one interface, to compare cost and quality on the same evals.
+- **Pluggable provider.** `LLM_PROVIDER` switches between Claude, OpenAI and Ollama behind one interface, to compare cost and quality on the same evals.
 - **Refusal fallback.** Security logs can trip a model's safety classifiers. The Claude provider opts in to server-side fallback, which re-runs a declined request on another model inside the same call.
 
 ## Known limitations
