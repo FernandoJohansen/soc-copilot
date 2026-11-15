@@ -34,6 +34,13 @@ class Settings(BaseSettings):
     # Seed the MITRE table on startup when it is empty (on in docker-compose).
     auto_seed: bool = False
 
+    # Public demo: the API is read-only except POST /analyze, which saves nothing and is
+    # rate-limited per client IP and globally per day (the global cap bounds LLM spend).
+    demo_mode: bool = False
+    demo_analyses_per_ip_per_hour: int = 5
+    demo_analyses_per_day: int = 200
+    demo_max_events: int = 500
+
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     eval_results_path: str = str(REPO_ROOT / "evals" / "results.json")
     cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]

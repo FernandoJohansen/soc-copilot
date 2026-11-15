@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.v1 import analyze, events, incidents, metrics
+from app.core import demo
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -32,10 +34,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def demo_read_only(request: Request, call_next):
+    if settings.demo_mode and demo.is_blocked(request.method, request.url.path):
+        return JSONResponse({"detail": demo.READ_ONLY_DETAIL}, status_code=403)
+    return await call_next(request)
+
+
 for router in (events.router, incidents.router, analyze.router, metrics.router):
     app.include_router(router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["health"])
-async def health() -> dict[str, str]:
-    return {"status": "ok", "llm_provider": settings.llm_provider}
+async def health() -> dict[str, str | bool]:
+    return {
+        "status": "ok",
+        "llm_provider": settings.llm_provider,
+        "demo_mode": settings.demo_mode,
+    }

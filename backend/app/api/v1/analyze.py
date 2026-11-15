@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import demo
+from app.core.config import settings
 from app.core.database import get_session
 from app.models import Event
 from app.schemas.analysis import (
@@ -10,15 +12,33 @@ from app.schemas.analysis import (
     AutoAnalyzeRequest,
     AutoAnalyzeResponse,
 )
-from app.services.analysis import analyze_events, event_to_dict
-from app.services.correlation import group_events
+from app.services.analysis import analyze_events, analyze_unassigned
 
 router = APIRouter(tags=["analyze"])
 
 
+def _demo_admit(payload: AnalyzeRequest, request: Request) -> None:
+    """In demo mode, bound the request size and spend one unit of the visitor's quota."""
+    size = len(payload.events or payload.event_ids or [])
+    if size > settings.demo_max_events:
+        raise HTTPException(
+            status_code=413,
+            detail=f"The demo analyzes at most {settings.demo_max_events} events at a time.",
+        )
+    refused = demo.quota.take(demo.client_ip(request))
+    if refused:
+        raise HTTPException(status_code=429, detail=refused)
+
+
 @router.post("/analyze", response_model=AnalyzeResponse)
-async def analyze(payload: AnalyzeRequest, session: AsyncSession = Depends(get_session)):
-    """Classify one group of events: RAG over ATT&CK, the Sigma baseline, then the LLM agent."""
+async def analyze(
+    payload: AnalyzeRequest, request: Request, session: AsyncSession = Depends(get_session)
+):
+    """Classify one group of events: RAG over ATT&CK, the Sigma baseline, then the LLM agent.
+
+    In demo mode nothing is saved and calls are rate-limited."""
+    if settings.demo_mode:
+        _demo_admit(payload, request)
     stored: list[Event] = []
     if payload.event_ids:
         rows = await session.scalars(select(Event).where(Event.id.in_(payload.event_ids)))
@@ -32,7 +52,7 @@ async def analyze(payload: AnalyzeRequest, session: AsyncSession = Depends(get_s
         inline=payload.events or [],
         use_sigma=payload.use_sigma,
         top_k=payload.top_k,
-        persist=payload.persist,
+        persist=payload.persist and not settings.demo_mode,
     )
 
 
@@ -40,25 +60,4 @@ async def analyze(payload: AnalyzeRequest, session: AsyncSession = Depends(get_s
 async def analyze_auto(payload: AutoAnalyzeRequest, session: AsyncSession = Depends(get_session)):
     """Group every event not yet tied to an incident (by IP, user and time), then analyze
     each group. Groups are analyzed largest first, up to max_groups."""
-    rows = await session.scalars(select(Event).where(Event.incident_id.is_(None)))
-    by_key = {}
-    dicts = []
-    for event in rows.all():
-        d = event_to_dict(event)
-        d["_id"] = event.id
-        by_key[event.id] = event
-        dicts.append(d)
-    groups = group_events(dicts, payload.window_minutes, payload.min_events)
-    results = []
-    for group in groups[: payload.max_groups]:
-        results.append(
-            await analyze_events(
-                session,
-                stored=[by_key[d["_id"]] for d in group],
-                use_sigma=payload.use_sigma,
-                top_k=payload.top_k,
-            )
-        )
-    return AutoAnalyzeResponse(
-        groups_found=len(groups), groups_analyzed=len(results), results=results
-    )
+    return await analyze_unassigned(session, **payload.model_dump())

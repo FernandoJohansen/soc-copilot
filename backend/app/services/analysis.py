@@ -5,11 +5,13 @@ from collections import Counter
 from collections.abc import Sequence
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Event, Incident
-from app.schemas.analysis import AnalysisResult, AnalyzeResponse
+from app.schemas.analysis import AnalysisResult, AnalyzeResponse, AutoAnalyzeResponse
 from app.schemas.event import EventCreate
+from app.services.correlation import group_events
 from app.services.llm import (
     LLMError,
     format_events,
@@ -104,4 +106,38 @@ async def analyze_events(
         llm_usage=llm_usage,
         mitre_context=mitre_context,
         latency_ms=round((time.perf_counter() - started) * 1000, 1),
+    )
+
+
+async def analyze_unassigned(
+    session: AsyncSession,
+    *,
+    window_minutes: int = 10,
+    min_events: int = 3,
+    max_groups: int = 20,
+    use_sigma: bool = True,
+    top_k: int = 5,
+) -> AutoAnalyzeResponse:
+    """Group every event not yet tied to an incident (by IP, user and time), then analyze
+    each group, largest first, up to max_groups."""
+    rows = await session.scalars(select(Event).where(Event.incident_id.is_(None)))
+    by_id: dict[int, Event] = {}
+    dicts = []
+    for event in rows.all():
+        d = event_to_dict(event)
+        d["_id"] = event.id
+        by_id[event.id] = event
+        dicts.append(d)
+    groups = group_events(dicts, window_minutes, min_events)
+    results = [
+        await analyze_events(
+            session,
+            stored=[by_id[d["_id"]] for d in group],
+            use_sigma=use_sigma,
+            top_k=top_k,
+        )
+        for group in groups[:max_groups]
+    ]
+    return AutoAnalyzeResponse(
+        groups_found=len(groups), groups_analyzed=len(results), results=results
     )

@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
-import { api, type Incident } from "../api";
+import { api, useHealth, type Incident } from "../api";
 import { AnalysisCard, Card, Notice, SeverityBadge, formatTime } from "../components/ui";
 
 export default function IncidentDetail() {
   const { id = "" } = useParams();
   const queryClient = useQueryClient();
+  const demo = useHealth().data?.demo_mode;
   const query = useQuery({ queryKey: ["incident", id], queryFn: () => api.incident(id) });
   const status = useMutation({
     mutationFn: (next: Incident["status"]) => api.setStatus(Number(id), next),
@@ -34,7 +35,8 @@ export default function IncidentDetail() {
           <select
             className="ml-auto rounded-md border border-line bg-surface px-2 py-1 text-sm"
             value={incident.status}
-            disabled={status.isPending}
+            disabled={status.isPending || demo}
+            title={demo ? "Read-only in the demo" : undefined}
             onChange={(e) => status.mutate(e.target.value as Incident["status"])}
             aria-label="Status"
           >

@@ -1,0 +1,19 @@
+# Used by docker-compose.prod.yml. Caddy obtains and renews the TLS certificate for
+# $DOMAIN by itself; the domain's DNS A/AAAA record must point at this server and ports
+# 80 and 443 must be open.
+#
+# Caddy sets X-Forwarded-For to the address it sees and ignores any value the client
+# sent, which is what the demo's per-visitor rate limit relies on.
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy frontend:80
+}

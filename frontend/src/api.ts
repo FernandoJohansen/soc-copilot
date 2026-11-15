@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+
 export type LogEvent = {
   id?: number;
   source: string;
@@ -90,6 +92,8 @@ export type EvalResults = {
   agent: EvalReport | null;
 };
 
+export type Health = { status: string; llm_provider: string; demo_mode: boolean };
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -100,7 +104,7 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/api/v1${path}`, {
+  const response = await fetch(path.startsWith("/health") ? path : `/api/v1${path}`, {
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
@@ -132,4 +136,10 @@ export const api = {
   analyze: (events: LogEvent[]) =>
     request<AnalyzeResponse>("/analyze", { method: "POST", body: JSON.stringify({ events }) }),
   metrics: () => request<EvalResults>("/metrics"),
+  health: () => request<Health>("/health"),
 };
+
+/** Server settings the UI adapts to (demo mode, which provider answers). Fetched once. */
+export function useHealth() {
+  return useQuery({ queryKey: ["health"], queryFn: api.health, staleTime: Infinity });
+}

@@ -1,12 +1,14 @@
+# Local development. Ports are published on 127.0.0.1 only, so nothing here is reachable
+# from the network. For a public server use docker-compose.prod.yml.
 services:
   db:
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: soc
-      POSTGRES_PASSWORD: soc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-soc}
       POSTGRES_DB: soc_copilot
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,14 +20,14 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
 
   ollama:
     image: ollama/ollama
     volumes:
       - ollama:/root/.ollama
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 5s
@@ -48,7 +50,7 @@ services:
       - path: .env
         required: false
     environment:
-      DATABASE_URL: postgresql+asyncpg://soc:soc@db:5432/soc_copilot
+      DATABASE_URL: postgresql+asyncpg://soc:${POSTGRES_PASSWORD:-soc}@db:5432/soc_copilot
       REDIS_URL: redis://redis:6379/0
       EVAL_RESULTS_PATH: /evals/results.json
       AUTO_SEED: "true"
@@ -63,7 +65,7 @@ services:
     volumes:
       - ./evals:/evals:ro
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -71,7 +73,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:80"
+      - "127.0.0.1:3000:80"
     depends_on:
       - api
 

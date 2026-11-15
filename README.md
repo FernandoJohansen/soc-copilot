@@ -106,6 +106,20 @@ uvicorn app.main:app --reload            # API on :8000
 cd ../frontend && npm install && npm run dev   # dashboard on :5173
 ```
 
+### Deploy a public demo
+
+`docker-compose.prod.yml` runs the stack on one server (4 GB of RAM is enough with a hosted model). [Caddy](https://caddyserver.com) is the only service with published ports, on 80 and 443, and gets the TLS certificate itself; Postgres and the API stay inside the compose network. Point a DNS record at the server, then:
+
+```bash
+cp .env.example .env    # set DOMAIN, POSTGRES_PASSWORD and ANTHROPIC_API_KEY
+docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml exec api python scripts/seed_demo.py
+```
+
+`seed_demo.py` loads the five sample scenarios and turns them into incidents, one LLM call each, so visitors land on a populated dashboard.
+
+The production file turns on `DEMO_MODE`, which makes the API read-only. The one write left open is `POST /analyze`, which saves nothing and is rate-limited: `DEMO_ANALYSES_PER_IP_PER_HOUR` (5) per visitor and `DEMO_ANALYSES_PER_DAY` (200) across everyone, which caps the LLM bill. Set a spend limit on the API key in the provider's console as well. The limits are kept in memory, so they reset when the API restarts.
+
 ### Tests and evals
 
 ```bash
@@ -133,7 +147,7 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - The logs are synthetic. The scenarios come from generators in `backend/scripts/generate_logs.py`, not from a lab or production capture.
 - Only 15 ATT&CK techniques are indexed.
 - No parsers for raw log formats (syslog lines, Windows event exports, Nginx access logs); events arrive as JSON or CEF.
-- No migrations: tables are created on startup. No authentication.
+- No migrations: tables are created on startup. No authentication: a public deployment relies on demo mode (read-only, rate-limited) instead.
 - The agent suggests actions and never executes them.
 - Redis is in the stack but not used yet.
 - The default local model is small (3 billion parameters) and slow on CPU, well over the 10-second latency target. A hosted model or a GPU changes both.

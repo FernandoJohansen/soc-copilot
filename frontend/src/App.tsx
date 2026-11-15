@@ -1,4 +1,5 @@
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useHealth } from "./api";
 import Analyze from "./pages/Analyze";
 import IncidentDetail from "./pages/IncidentDetail";
 import Incidents from "./pages/Incidents";
@@ -18,6 +19,7 @@ const TITLES: Record<string, string> = {
 
 export default function App() {
   const section = useLocation().pathname.split("/")[1] ?? "";
+  const demo = useHealth().data?.demo_mode;
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="border-b border-line bg-surface-2 md:w-52 md:shrink-0 md:border-b-0 md:border-r">
@@ -42,6 +44,12 @@ export default function App() {
         <header className="border-b border-line px-4 py-3 md:px-6">
           <h1 className="text-base font-semibold">{TITLES[section] ?? "SOC Copilot"}</h1>
         </header>
+        {demo && (
+          <p className="border-b border-line bg-surface-2 px-4 py-2 text-xs text-ink-2 md:px-6">
+            Public demo with synthetic logs. It is read-only: analyses run but are not saved, and each
+            visitor gets a few per hour.
+          </p>
+        )}
         <main className="px-4 py-5 md:px-6">
           <Routes>
             <Route path="/" element={<Navigate to="/incidents" replace />} />

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { api, type LogEvent } from "../api";
+import { api, useHealth, type LogEvent } from "../api";
 import { AnalysisCard, Card, Notice, Technique } from "../components/ui";
 import samples from "../samples.json";
 
@@ -23,6 +23,7 @@ export default function Analyze() {
   const [text, setText] = useState("");
   const [parseError, setParseError] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const health = useHealth().data;
   const analysis = useMutation({
     mutationFn: api.analyze,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["incidents"] }),
@@ -78,8 +79,12 @@ export default function Analyze() {
           )}
           <span className="text-xs text-ink-3">
             {analysis.isPending
-              ? "A local model on CPU can take a minute or two."
-              : "The events and any resulting incident are saved."}
+              ? health?.llm_provider === "ollama"
+                ? "A local model on CPU can take a minute or two."
+                : "This usually takes a few seconds."
+              : health?.demo_mode
+                ? "Demo mode: nothing is saved."
+                : "The events and any resulting incident are saved."}
           </span>
         </div>
         {parseError && <div className="mt-3"><Notice tone="error">{parseError}</Notice></div>}
@@ -96,6 +101,8 @@ export default function Analyze() {
                 <Link className="text-accent underline" to={`/incidents/${result.incident_id}`}>
                   Open incident #{result.incident_id}
                 </Link>
+              ) : health?.demo_mode ? (
+                "Nothing was saved (demo mode)."
               ) : (
                 "No incident was created."
               )}
