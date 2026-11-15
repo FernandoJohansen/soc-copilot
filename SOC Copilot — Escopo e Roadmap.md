@@ -111,7 +111,7 @@ O projeto inteiro está nesta pasta (reconstruído aqui a partir deste documento
 7. `uvicorn app.main:app --reload` — sobe a API na porta 8000
 8. Testar: `curl -X POST http://localhost:8000/api/v1/analyze -H 'Content-Type: application/json' -d '{"event_ids": [1,2,3]}'`
 9. Rodar testes: `pytest -v` (37 testes devem passar)
-10. Rodar evals: `pytest backend/tests/evals -m eval -v` na raiz (gera `evals/results.json`; a parte do agente precisa de API key)
+10. Rodar evals: `pytest backend/tests/evals -m eval -v` na raiz (gera `evals/results.json`; a parte do agente precisa do Ollama no ar ou de uma API key)
 
 As Fases 1 a 4 estão implementadas. O que falta depende de você: rodar os evals do agente com uma API key, gravar o GIF e fazer o deploy.
 
@@ -212,8 +212,8 @@ Quem for gerar código para as Fases 3 e 4 precisa seguir estes padrões já est
 
 - `DATABASE_URL=postgresql+asyncpg://soc:soc@localhost:5432/soc_copilot`
 - `REDIS_URL=redis://localhost:6379/0`
-- `LLM_PROVIDER=claude` (ou `openai`, ou `ollama` para um modelo local, sem API key)
-- `OLLAMA_MODEL=llama3.1` e `OLLAMA_BASE_URL=http://localhost:11434/v1` (só com `ollama`)
+- `LLM_PROVIDER=ollama` (padrão: modelo local, sem API key), ou `claude`, ou `openai`
+- `OLLAMA_MODEL=qwen2.5:3b` e `OLLAMA_BASE_URL=http://localhost:11434` (só com `ollama`; no Docker Compose o Ollama já sobe junto e baixa o modelo)
 - `ANTHROPIC_API_KEY=sk-ant-...`
 - `OPENAI_API_KEY=sk-...`
 

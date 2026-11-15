@@ -115,6 +115,8 @@ def score(entries: list[dict[str, Any]], predictions: list[Prediction]) -> dict[
         input_tokens * settings.llm_price_input_per_mtok
         + output_tokens * settings.llm_price_output_per_mtok
     ) / 1_000_000
+    if settings.llm_provider == "ollama":
+        cost = 0.0  # a local model has no per-token price
     return {
         "n": len(pairs),
         "attacks": len(attacks),
@@ -201,7 +203,7 @@ async def _run_agent(entries: list[dict[str, Any]], concurrency: int) -> list[Pr
     semaphore = asyncio.Semaphore(concurrency)
     transport = httpx.ASGITransport(app=app)
 
-    async with httpx.AsyncClient(transport=transport, base_url="http://eval", timeout=300) as http:
+    async with httpx.AsyncClient(transport=transport, base_url="http://eval", timeout=900) as http:
 
         async def one(entry: dict[str, Any]) -> Prediction:
             async with semaphore:
@@ -233,8 +235,11 @@ async def _run_agent(entries: list[dict[str, Any]], concurrency: int) -> list[Pr
     return list(predictions)
 
 
-def run_agent(entries: list[dict[str, Any]], concurrency: int = 4) -> list[Prediction]:
+def run_agent(entries: list[dict[str, Any]], concurrency: int | None = None) -> list[Prediction]:
     """Send every entry through POST /api/v1/analyze (in process) and collect the LLM's answer."""
+    if concurrency is None:
+        # A local model answers one request at a time; queueing would be charged as latency.
+        concurrency = 1 if settings.llm_provider == "ollama" else 4
     return asyncio.run(_run_agent(entries, concurrency))
 
 

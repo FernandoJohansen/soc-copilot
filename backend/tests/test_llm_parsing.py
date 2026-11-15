@@ -53,10 +53,10 @@ def test_benign_answer_gets_severity_1_and_no_technique():
 def test_format_events_says_what_was_left_out():
     events = [
         {"source": "dns", "event_type": "query", "timestamp": f"t{i}", "raw_data": {"n": i}}
-        for i in range(llm.MAX_EVENTS_IN_PROMPT + 5)
+        for i in range(settings.llm_max_events + 5)
     ]
     lines = format_events(events).splitlines()
-    assert len(lines) == llm.MAX_EVENTS_IN_PROMPT + 1
+    assert len(lines) == settings.llm_max_events + 1
     assert "5 later events not shown: 5 dns/query" in lines[-1]
 
 
@@ -81,7 +81,35 @@ def test_ollama_provider_needs_no_key(monkeypatch):
     monkeypatch.setattr(llm, "_instance", None)
     monkeypatch.setattr(settings, "llm_provider", "ollama")
     monkeypatch.setattr(settings, "ollama_model", "qwen2.5:14b")
+    monkeypatch.setattr(settings, "ollama_base_url", "http://localhost:11434/v1")
     provider = get_llm_provider()
     assert (provider.name, provider._model) == ("ollama", "qwen2.5:14b")
-    assert str(provider._client.base_url).startswith(settings.ollama_base_url)
+    assert str(provider._client.base_url).rstrip("/") == "http://localhost:11434"
     monkeypatch.setattr(llm, "_instance", None)
+
+
+def test_non_incident_drops_mitre_fields():
+    raw = (
+        '{"summary": "CI retrying", "is_incident": false, "severity": 3, '
+        '"mitre_tactic": "Credential Access", "mitre_technique_id": "T1110", '
+        '"mitre_technique_name": "Brute Force", "suggested_actions": [], "confidence": 0.8}'
+    )
+    result = llm._parse_response(raw)
+    assert (result.severity, result.mitre_tactic, result.mitre_technique_id) == (1, None, None)
+
+
+def test_format_events_drops_redundant_text():
+    event = {
+        "timestamp": "2026-11-02T10:00:05.123456+00:00",
+        "source": "dns",
+        "event_type": "query",
+        "raw_data": {
+            "src_ip": "10.0.3.52",
+            "query": "a" * 80 + ".evil.example",
+            "message": "10.0.3.52 queried TXT " + "a" * 80 + ".evil.example",
+        },
+    }
+    line = llm.format_events([event])
+    assert line.startswith("2026-11-02T10:00:05Z dns query ")
+    assert "message=" not in line
+    assert "[93 chars]" in line

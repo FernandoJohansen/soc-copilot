@@ -76,7 +76,11 @@ export default function Analyze() {
           {analysis.isPending && (
             <span className="size-4 animate-spin rounded-full border-2 border-line border-t-accent" role="status" aria-label="Analyzing" />
           )}
-          <span className="text-xs text-ink-3">The events and any resulting incident are saved.</span>
+          <span className="text-xs text-ink-3">
+            {analysis.isPending
+              ? "A local model on CPU can take a minute or two."
+              : "The events and any resulting incident are saved."}
+          </span>
         </div>
         {parseError && <div className="mt-3"><Notice tone="error">{parseError}</Notice></div>}
         {analysis.isError && <div className="mt-3"><Notice tone="error">{analysis.error.message}</Notice></div>}

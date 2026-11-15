@@ -39,7 +39,7 @@ flowchart LR
     pg --> group[Correlation<br/>by IP, user, time]
     group --> rag[RAG over ATT&CK<br/>pgvector]
     group --> sigma[Sigma-style rules<br/>baseline and fallback]
-    rag --> llm[LLM agent<br/>Claude or OpenAI]
+    rag --> llm[LLM agent<br/>local model, Claude or OpenAI]
     llm --> incident[Incident<br/>severity, technique,<br/>summary, actions]
     sigma -. used if the LLM is unavailable .-> incident
     incident --> pg
@@ -52,7 +52,7 @@ flowchart LR
 | --- | --- |
 | API | FastAPI, SQLAlchemy 2 async, Pydantic v2, Python 3.12 |
 | Storage | PostgreSQL 16 with pgvector (384-dimension `all-MiniLM-L6-v2` embeddings) |
-| LLM | Pluggable provider: Claude (`claude-sonnet-5-5` by default), OpenAI, or a local model through Ollama |
+| LLM | Pluggable provider: a local model through Ollama (`qwen2.5:3b`, the default), Claude (`claude-sonnet-5-5`) or OpenAI |
 | Baseline | Five deterministic rules in `backend/app/services/sigma_rules.py` |
 | Frontend | React 18, TypeScript, Vite, Tailwind, React Query |
 | Evals | pytest and DeepEval, run in GitHub Actions |
@@ -60,21 +60,19 @@ flowchart LR
 ## Run it
 
 ```bash
-cp .env.example .env        # set ANTHROPIC_API_KEY or OPENAI_API_KEY
 docker compose up -d --build
 docker compose exec api python scripts/generate_logs.py   # load sample logs
 ```
 
 Open the dashboard at <http://localhost:3000>. The API docs are at <http://localhost:8000/docs>.
 
-The MITRE techniques are seeded on first start. Without an API key the stack still runs: the Sigma rules classify the events and the response says the LLM did not answer.
+No API key is needed. The stack runs its own [Ollama](https://ollama.com) and downloads `qwen2.5:3b` (about 2 GB) on first start; the MITRE techniques are seeded at the same time. On a laptop CPU the model takes one to two minutes per incident. If the model does not answer, the Sigma rules classify the events and the response says so.
 
-To use a local model instead of a hosted one, run [Ollama](https://ollama.com) on the host and set in `.env`:
+To use a hosted model, or a different local one, create `.env` from `.env.example`:
 
 ```bash
-LLM_PROVIDER=ollama
-OLLAMA_MODEL=llama3.1
-OLLAMA_BASE_URL=http://host.docker.internal:11434/v1   # http://localhost:11434/v1 outside Docker
+LLM_PROVIDER=claude          # or openai; then set ANTHROPIC_API_KEY or OPENAI_API_KEY
+OLLAMA_MODEL=qwen2.5:7b      # or a larger local model, if the machine can run it
 ```
 
 Then group the sample logs into incidents and analyze each group:
@@ -116,7 +114,7 @@ pytest backend/tests/evals -m eval -v   # evals; writes evals/results.json
 python backend/scripts/update_readme.py # refresh the table above
 ```
 
-The baseline half of the evals runs anywhere. The agent half needs Postgres with the techniques seeded and an API key; without them those tests are skipped and the previous agent results are kept. One agent run makes 68 LLM calls.
+The baseline half of the evals runs anywhere. The agent half needs Postgres with the techniques seeded and a model to call (Ollama running, or an API key); without them those tests are skipped and the previous agent results are kept. One agent run makes 68 LLM calls, which takes about two hours with the local model on a laptop CPU.
 
 To rebuild the golden dataset after changing the generators: `python backend/scripts/build_golden.py`.
 
@@ -127,7 +125,7 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - **RAG instead of the whole ATT&CK matrix in the prompt.** pgvector returns the five closest techniques. On the golden attacks the right technique is in the top five for 42 of 43 entries and in the top three for 34, which is why the default is five.
 - **A written severity policy.** One four-level policy (`backend/app/services/severity.py`) is shared by the rules, the prompt and the labels, so a severity disagreement is a judgement about the events and not about the scale.
 - **The agent can say "not an incident".** Benign entries make up a third of the dataset, so false positives are measured and not assumed away.
-- **Pluggable provider.** `LLM_PROVIDER` switches between Claude, OpenAI and Ollama behind one interface, to compare cost and quality on the same evals.
+- **Pluggable provider.** `LLM_PROVIDER` switches between Claude, OpenAI and Ollama behind one interface, to compare cost and quality on the same evals. The default is a small local model so the project runs with no account and no key.
 - **Refusal fallback.** Security logs can trip a model's safety classifiers. The Claude provider opts in to server-side fallback, which re-runs a declined request on another model inside the same call.
 
 ## Known limitations
@@ -138,6 +136,7 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - No migrations: tables are created on startup. No authentication.
 - The agent suggests actions and never executes them.
 - Redis is in the stack but not used yet.
+- The default local model is small (3 billion parameters) and slow on CPU, well over the 10-second latency target. A hosted model or a GPU changes both.
 
 ## Next steps
 

@@ -13,8 +13,6 @@ from app.core.config import settings
 from app.schemas.analysis import AnalysisResult, LLMUsage
 from app.services.severity import SEVERITY_POLICY
 
-MAX_EVENTS_IN_PROMPT = 300
-
 SYSTEM_PROMPT = f"""\
 You are a SOC triage analyst. You receive a group of related security log events that were \
 already correlated by source IP, user and time, plus a few MITRE ATT&CK techniques retrieved \
@@ -43,10 +41,12 @@ executed automatically.
 
 ANALYSIS_SCHEMA: dict[str, Any] = {
     "type": "object",
+    # summary comes first: a model that writes the fields in order then reasons before
+    # it commits to a verdict, which matters for small local models.
     "properties": {
+        "summary": {"type": "string"},
         "is_incident": {"type": "boolean"},
         "severity": {"type": "integer", "enum": [1, 2, 3, 4]},
-        "summary": {"type": "string"},
         "mitre_tactic": {"type": "string"},
         "mitre_technique_id": {"type": "string"},
         "mitre_technique_name": {"type": "string"},
@@ -77,16 +77,51 @@ class LLMResponse:
     usage: LLMUsage
 
 
+MAX_VALUE_CHARS = 60
+
+
+def _compact_value(value: Any) -> str:
+    """Shorten a long string in the middle, keeping its length visible."""
+    if isinstance(value, str) and len(value) > MAX_VALUE_CHARS:
+        value = f"{value[:16]}...[{len(value)} chars]...{value[-28:]}"
+    return json.dumps(value, default=str)
+
+
+def _is_rendering_of_fields(message: Any, raw: dict[str, Any]) -> bool:
+    """True when `message` is just the raw log line the other fields were parsed from."""
+    if not isinstance(message, str):
+        return False
+    others = [str(v) for k, v in raw.items() if k != "message" and v not in (None, "")]
+    return sum(v in message for v in others) >= 2
+
+
+def _short_timestamp(timestamp: Any) -> str:
+    """Seconds are enough for triage: drop microseconds and write UTC as Z."""
+    text = str(timestamp)
+    return re.sub(r"\.\d+", "", text).replace("+00:00", "Z")
+
+
 def format_events(events: Sequence[dict[str, Any]]) -> str:
-    """One line per event. Past MAX_EVENTS_IN_PROMPT, say what was left out."""
+    """One compact line per event. Past LLM_MAX_EVENTS, say what was left out.
+
+    Prompt size is what a local model pays for, so redundant text is dropped: a `message`
+    that repeats the structured fields, sub-second timestamps, the middle of long strings.
+    """
+    limit = settings.llm_max_events
     lines = []
-    for event in events[:MAX_EVENTS_IN_PROMPT]:
+    for event in events[:limit]:
         raw = event.get("raw_data") or {}
-        fields = " ".join(f"{k}={json.dumps(v, default=str)}" for k, v in raw.items())
-        lines.append(
-            f"{event.get('timestamp')} {event.get('source')} {event.get('event_type')} {fields}"
+        skip_message = _is_rendering_of_fields(raw.get("message"), raw)
+        fields = " ".join(
+            f"{k}={_compact_value(v)}"
+            for k, v in raw.items()
+            if not (k == "message" and skip_message)
         )
-    omitted = events[MAX_EVENTS_IN_PROMPT:]
+        lines.append(
+            f"{_short_timestamp(event.get('timestamp'))} {event.get('source')} "
+            f"{event.get('event_type')} {fields}"
+        )
+    omitted = events[limit:]
     if omitted:
         kinds = Counter(f"{e.get('source')}/{e.get('event_type')}" for e in omitted)
         breakdown = ", ".join(f"{n} {kind}" for kind, n in kinds.most_common())
@@ -110,7 +145,7 @@ def build_user_prompt(events_text: str, mitre_context: str) -> str:
         f"{mitre_context}\n\n"
         "Events:\n"
         f"{events_text}\n\n"
-        "Return the analysis as a JSON object with the keys is_incident, severity, summary, "
+        "Return the analysis as a JSON object with the keys summary, is_incident, severity, "
         "mitre_tactic, mitre_technique_id, mitre_technique_name, suggested_actions, confidence."
     )
 
@@ -145,7 +180,9 @@ def _parse_response(raw: str) -> AnalysisResult:
     known = AnalysisResult.model_fields.keys()
     result = AnalysisResult(**{k: v for k, v in data.items() if k in known})
     if not result.is_incident:
+        # Small models sometimes fill these in anyway; a non-incident has no technique.
         result.severity = 1
+        result.mitre_tactic = result.mitre_technique_id = result.mitre_technique_name = None
     return result
 
 
@@ -254,20 +291,54 @@ class OpenAIProvider(LLMProvider):
         )
 
 
-class OllamaProvider(OpenAIProvider):
-    """A local model served by Ollama, through its OpenAI-compatible endpoint."""
+class OllamaProvider(LLMProvider):
+    """A local model served by Ollama, through its native chat API.
+
+    The native API (unlike the OpenAI-compatible one) constrains the answer to the JSON
+    schema and lets us set the context window, which Ollama otherwise truncates silently.
+    """
 
     name = "ollama"
 
     def __init__(self) -> None:
-        import openai
+        import httpx
 
-        self._openai = openai
+        self._httpx = httpx
         self._model = settings.ollama_model
-        # Ollama ignores the key, but the SDK requires one. Local models are slow: long timeout.
-        self._client = openai.AsyncOpenAI(
-            base_url=settings.ollama_base_url, api_key="ollama", timeout=300.0
+        base_url = settings.ollama_base_url.rstrip("/").removesuffix("/v1")
+        # Local models are slow, on CPU especially: long timeout.
+        self._client = httpx.AsyncClient(base_url=base_url, timeout=settings.ollama_timeout)
+
+    async def analyze(self, events_text: str, mitre_context: str) -> LLMResponse:
+        httpx = self._httpx
+        payload = {
+            "model": self._model,
+            "stream": False,
+            "format": ANALYSIS_SCHEMA,
+            "options": {"num_ctx": settings.ollama_num_ctx, "temperature": 0},
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": build_user_prompt(events_text, mitre_context)},
+            ],
+        }
+        try:
+            response = await self._client.post("/api/chat", json=payload)
+        except httpx.TimeoutException as e:
+            raise LLMError(f"Ollama did not answer within {settings.ollama_timeout:.0f} s.") from e
+        except httpx.HTTPError as e:
+            raise LLMError(f"Could not reach Ollama at {self._client.base_url}.") from e
+        if response.status_code == 404:
+            raise LLMError(f"Ollama has no model {self._model!r}; run `ollama pull {self._model}`.")
+        if response.status_code >= 400:
+            raise LLMError(f"Ollama error {response.status_code}: {response.text[:200]}")
+        data = response.json()
+        usage = LLMUsage(
+            model=data.get("model", self._model),
+            input_tokens=data.get("prompt_eval_count", 0),
+            output_tokens=data.get("eval_count", 0),
         )
+        content = (data.get("message") or {}).get("content", "")
+        return LLMResponse(result=_parse_response(content), usage=usage)
 
 
 _PROVIDERS: dict[str, type[LLMProvider]] = {

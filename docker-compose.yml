@@ -20,6 +20,28 @@ services:
     ports:
       - "6379:6379"
 
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # one-shot: downloads the model on first start (about 2 GB), then exits
+  ollama-pull:
+    image: ollama/ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["ollama", "pull", "${OLLAMA_MODEL:-qwen2.5:3b}"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+
   api:
     build: ./backend
     env_file:
@@ -30,8 +52,13 @@ services:
       REDIS_URL: redis://redis:6379/0
       EVAL_RESULTS_PATH: /evals/results.json
       AUTO_SEED: "true"
+      # Local model by default, so the stack works with no API key.
+      # Set LLM_PROVIDER=claude or openai in .env to use a hosted model.
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
     extra_hosts:
-      # lets the container reach an Ollama server running on the host
+      # lets the container reach an Ollama server running on the host instead
       - "host.docker.internal:host-gateway"
     volumes:
       - ./evals:/evals:ro
@@ -50,3 +77,4 @@ services:
 
 volumes:
   pgdata:
+  ollama:

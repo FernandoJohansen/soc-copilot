@@ -12,16 +12,20 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://soc:soc@localhost:5432/soc_copilot"
     redis_url: str = "redis://localhost:6379/0"
 
-    llm_provider: str = "claude"
+    llm_provider: str = "ollama"
     anthropic_api_key: str = ""
     openai_api_key: str = ""
     anthropic_model: str = "claude-sonnet-5-5"
     anthropic_effort: str = "low"
     openai_model: str = "gpt-4o-mini"
-    # Ollama serves an OpenAI-compatible API; no key is needed.
-    ollama_base_url: str = "http://localhost:11434/v1"
-    ollama_model: str = "llama3.1"
+    # Ollama runs a local model; no key is needed.
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "qwen2.5:3b"
+    ollama_num_ctx: int = 16384
+    ollama_timeout: float = 600.0
     llm_max_tokens: int = 8000
+    # Events shown to the model per incident; the rest are summarized by count.
+    llm_max_events: int = 300
 
     # USD per million tokens; only used to report cost in the evals.
     llm_price_input_per_mtok: float = 2.0
