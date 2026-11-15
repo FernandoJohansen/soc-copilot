@@ -1,0 +1,1000 @@
+{
+ "SSH brute force, then a login": [
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:03.807329+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "admin",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for admin from 198.51.100.201 port 42445 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:09.022930+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "root",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for root from 198.51.100.201 port 61179 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:13.478765+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "ubuntu",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for ubuntu from 198.51.100.201 port 42201 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:17.265138+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "root",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for root from 198.51.100.201 port 39292 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:21.419912+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "root",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for root from 198.51.100.201 port 32744 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:27.348686+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "ubuntu",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for ubuntu from 198.51.100.201 port 59687 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:32.304350+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "ubuntu",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for ubuntu from 198.51.100.201 port 40321 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:34.364353+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "ubuntu",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for ubuntu from 198.51.100.201 port 64627 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:36.602557+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "root",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for root from 198.51.100.201 port 42465 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:41.001029+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "root",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for root from 198.51.100.201 port 60404 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:44.763153+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "admin",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for admin from 198.51.100.201 port 42800 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:47.697736+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "ubuntu",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for ubuntu from 198.51.100.201 port 49277 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:49.716111+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "admin",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for admin from 198.51.100.201 port 35569 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_failure",
+   "timestamp": "2026-11-02T09:00:54.335318+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "admin",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Failed password for admin from 198.51.100.201 port 56658 ssh2"
+   }
+  },
+  {
+   "source": "auth.log",
+   "event_type": "authentication_success",
+   "timestamp": "2026-11-02T09:01:00.325943+00:00",
+   "raw_data": {
+    "host": "app-01",
+    "user": "admin",
+    "src_ip": "198.51.100.201",
+    "service": "sshd",
+    "message": "Accepted password for admin from 198.51.100.201 port 51022 ssh2"
+   }
+  }
+ ],
+ "Phishing with a download": [
+  {
+   "source": "email_gateway",
+   "event_type": "email_received",
+   "timestamp": "2026-11-02T09:00:00+00:00",
+   "raw_data": {
+    "user": "alice",
+    "recipient": "alice@corp.example",
+    "sender": "it-support@docs-sharepoint-auth.com",
+    "subject": "Action required: your password expires today",
+    "link_url": "http://docs-sharepoint-auth.com/verify?id=51324",
+    "link_domain": "docs-sharepoint-auth.com",
+    "spf": "fail",
+    "sender_domain_age_days": 9,
+    "message": "Email from it-support@docs-sharepoint-auth.com to alice: Action required: your password expires today"
+   }
+  },
+  {
+   "source": "proxy",
+   "event_type": "url_click",
+   "timestamp": "2026-11-02T09:07:12.163143+00:00",
+   "raw_data": {
+    "user": "alice",
+    "src_ip": "10.0.3.21",
+    "url": "http://docs-sharepoint-auth.com/verify?id=51324",
+    "domain": "docs-sharepoint-auth.com",
+    "category": "newly_registered_domain",
+    "message": "alice opened http://docs-sharepoint-auth.com/verify?id=51324"
+   }
+  },
+  {
+   "source": "proxy",
+   "event_type": "file_download",
+   "timestamp": "2026-11-02T09:08:09.398813+00:00",
+   "raw_data": {
+    "user": "alice",
+    "src_ip": "10.0.3.21",
+    "url": "http://docs-sharepoint-auth.com/files/invoice_8841.iso",
+    "domain": "docs-sharepoint-auth.com",
+    "filename": "invoice_8841.iso",
+    "message": "alice downloaded invoice_8841.iso from docs-sharepoint-auth.com"
+   }
+  }
+ ],
+ "Slow DNS tunnel": [
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:00:26.617047+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "woohqsq2rxzgfkukdmir2rcc6uc66uqecvf6twhoobk27avweman6c5i.0000.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT woohqsq2rxzgfkukdmir2rcc6uc66uqecvf6twhoobk27avweman6c5i.0000.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:00:57.248995+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "dvvhvnoltk6wkd3to5vrjjfscihdr5mqah2shio5h7idft34jtd7fwgg.0001.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT dvvhvnoltk6wkd3to5vrjjfscihdr5mqah2shio5h7idft34jtd7fwgg.0001.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:01:22.476238+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "3amps2de6ehmetn7h7wpdmzudymou5bc3zdrgp5oad73jqjl3ym274wn.0002.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT 3amps2de6ehmetn7h7wpdmzudymou5bc3zdrgp5oad73jqjl3ym274wn.0002.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:01:57.707400+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "widtumgpn6fhezabiwbjjmoqgd5gmo74jbvv3o66mt74icypq4qy3mcs.0003.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT widtumgpn6fhezabiwbjjmoqgd5gmo74jbvv3o66mt74icypq4qy3mcs.0003.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:02:37.558184+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "r3ob4aejjaiuknx5itowjtuo7bzdxehzizqkztmc3g6zpsdu3rgtphtw.0004.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT r3ob4aejjaiuknx5itowjtuo7bzdxehzizqkztmc3g6zpsdu3rgtphtw.0004.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:03:17.495720+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "j3rb3gtkk5h2jwndwojv22fpdh2zhrykitqef7pmyf3skgy6s43cfyai.0005.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT j3rb3gtkk5h2jwndwojv22fpdh2zhrykitqef7pmyf3skgy6s43cfyai.0005.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:03:54.950062+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "2yenyytqh7fbeuquaqjvp2yrc7iyw3zvrmns5fl2mt32ewaygy7a2z7y.0006.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT 2yenyytqh7fbeuquaqjvp2yrc7iyw3zvrmns5fl2mt32ewaygy7a2z7y.0006.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:04:21.858378+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "4bufpfxgl3kxxhl6cxk72gixspqlrpzcksqnjxkfihlwecwmzuxnihut.0007.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT 4bufpfxgl3kxxhl6cxk72gixspqlrpzcksqnjxkfihlwecwmzuxnihut.0007.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:04:56.015050+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "5m4lhooiy2ldapg5seulb2skxwk2obfbbvql54csn7hi2yvvkmzdhb65.0008.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT 5m4lhooiy2ldapg5seulb2skxwk2obfbbvql54csn7hi2yvvkmzdhb65.0008.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:05:22.192517+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "m2bcedgkhskrve4f5inrsa7ibfn4akmdubfxf5tdmnjud62aba6tw2lf.0009.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT m2bcedgkhskrve4f5inrsa7ibfn4akmdubfxf5tdmnjud62aba6tw2lf.0009.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:06:00.764878+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "zmsle7j6sqpew5eveoc6cm7jfqxgzyxnlqjwtoanliupvzkptmiqrq23.0010.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT zmsle7j6sqpew5eveoc6cm7jfqxgzyxnlqjwtoanliupvzkptmiqrq23.0010.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:06:35.002936+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "almpuesiow6epvw4l43m2hoy5kbqmoxkvp2tonaupw6375j6hycaagnu.0011.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT almpuesiow6epvw4l43m2hoy5kbqmoxkvp2tonaupw6375j6hycaagnu.0011.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:07:00.701908+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "mcts4sgkw5uf426256d6tmlzskg4wgxzjiq26iji46mrpdulwvob7oto.0012.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT mcts4sgkw5uf426256d6tmlzskg4wgxzjiq26iji46mrpdulwvob7oto.0012.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:07:36.695485+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "zdfj3bmv4cozk4ilmxzajs7nep6bmauxuae7wcgjhbyozuvwsqcp4bum.0013.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT zdfj3bmv4cozk4ilmxzajs7nep6bmauxuae7wcgjhbyozuvwsqcp4bum.0013.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:08:02.198613+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "hd2c5gje7xoke6kmfaj7rtdtppskioaroxvadoy72squ7efzuniqtgpy.0014.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT hd2c5gje7xoke6kmfaj7rtdtppskioaroxvadoy72squ7efzuniqtgpy.0014.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:08:32.715252+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "yygwec5yhrz6mrqlv3x4jtvrxtr5bnn4raislnby2muscu4gcpfvqb5a.0015.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT yygwec5yhrz6mrqlv3x4jtvrxtr5bnn4raislnby2muscu4gcpfvqb5a.0015.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:09:04.814429+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "xaroee72puan6i5zo7nuvdgknj6kxoprfbhgbsuwyc7qpfelbto6mih3.0016.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT xaroee72puan6i5zo7nuvdgknj6kxoprfbhgbsuwyc7qpfelbto6mih3.0016.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:09:35.502075+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "4o6c6a4ywppjxpxkpyjnyhuicrclynaximalbi2wvslb3yc4jl7m2ewy.0017.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT 4o6c6a4ywppjxpxkpyjnyhuicrclynaximalbi2wvslb3yc4jl7m2ewy.0017.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:10:14.515847+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "a463jmpnko4zjwl3f52qqfogoaags3twczvz7vxppkhyu46aoik7cvoj.0018.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT a463jmpnko4zjwl3f52qqfogoaags3twczvz7vxppkhyu46aoik7cvoj.0018.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:10:40.831831+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "k3l3ibjoz3xtvaxdc7252d6gwl6qnzq4kliew77trsvmpzivkcosuyx6.0019.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT k3l3ibjoz3xtvaxdc7252d6gwl6qnzq4kliew77trsvmpzivkcosuyx6.0019.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:11:11.351101+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "gql2ujewmknk3ejntsokx2w3golyfnmezzpwwk5ne734b3k63xt2nk5p.0020.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT gql2ujewmknk3ejntsokx2w3golyfnmezzpwwk5ne734b3k63xt2nk5p.0020.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:11:39.973357+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "mevj4z3blr4kvjcge5ae4rwrgkoswwnceqtu63wnf3am25cbkxhe22jp.0021.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT mevj4z3blr4kvjcge5ae4rwrgkoswwnceqtu63wnf3am25cbkxhe22jp.0021.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:12:08.267019+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "s3c3t2zzjacvdgeexm22w464ejkay4rc2n3bq77qn3fft4hfjplfnasj.0022.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT s3c3t2zzjacvdgeexm22w464ejkay4rc2n3bq77qn3fft4hfjplfnasj.0022.telemetry-upd8.com"
+   }
+  },
+  {
+   "source": "dns",
+   "event_type": "query",
+   "timestamp": "2026-11-02T09:12:47.972419+00:00",
+   "raw_data": {
+    "src_ip": "10.0.3.21",
+    "query": "5zbgluszbbgcxvtc4iocpq25omcydktybujhcruwyp6ozipyzu3alhfv.0023.telemetry-upd8.com",
+    "domain": "telemetry-upd8.com",
+    "qtype": "TXT",
+    "message": "10.0.3.21 queried TXT 5zbgluszbbgcxvtc4iocpq25omcydktybujhcruwyp6ozipyzu3alhfv.0023.telemetry-upd8.com"
+   }
+  }
+ ],
+ "Monitoring health checks (benign)": [
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:00+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.15",
+    "dst_host": "fs-02",
+    "dst_port": 22,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.15:22 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:00.200000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.15",
+    "dst_host": "fs-02",
+    "dst_port": 80,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.15:80 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:00.400000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.15",
+    "dst_host": "fs-02",
+    "dst_port": 443,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.15:443 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:00.600000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.15",
+    "dst_host": "fs-02",
+    "dst_port": 5432,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.15:5432 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:00.800000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.15",
+    "dst_host": "fs-02",
+    "dst_port": 9100,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.15:9100 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:01.500000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.17",
+    "dst_host": "mail-01",
+    "dst_port": 22,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.17:22 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:01.700000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.17",
+    "dst_host": "mail-01",
+    "dst_port": 80,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.17:80 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:01.900000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.17",
+    "dst_host": "mail-01",
+    "dst_port": 443,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.17:443 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:02.100000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.17",
+    "dst_host": "mail-01",
+    "dst_port": 5432,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.17:5432 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:02.300000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.17",
+    "dst_host": "mail-01",
+    "dst_port": 9100,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.17:9100 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:03+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.14",
+    "dst_host": "fs-01",
+    "dst_port": 22,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.14:22 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:03.200000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.14",
+    "dst_host": "fs-01",
+    "dst_port": 80,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.14:80 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:03.400000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.14",
+    "dst_host": "fs-01",
+    "dst_port": 443,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.14:443 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:03.600000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.14",
+    "dst_host": "fs-01",
+    "dst_port": 5432,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.14:5432 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:03.800000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.14",
+    "dst_host": "fs-01",
+    "dst_port": 9100,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.14:9100 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:04.500000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.13",
+    "dst_host": "app-01",
+    "dst_port": 22,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.13:22 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:04.700000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.13",
+    "dst_host": "app-01",
+    "dst_port": 80,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.13:80 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:04.900000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.13",
+    "dst_host": "app-01",
+    "dst_port": 443,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.13:443 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:05.100000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.13",
+    "dst_host": "app-01",
+    "dst_port": 5432,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.13:5432 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:05.300000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.13",
+    "dst_host": "app-01",
+    "dst_port": 9100,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.13:9100 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:06+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.12",
+    "dst_host": "db-01",
+    "dst_port": 22,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.12:22 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:06.200000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.12",
+    "dst_host": "db-01",
+    "dst_port": 80,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.12:80 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:06.400000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.12",
+    "dst_host": "db-01",
+    "dst_port": 443,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.12:443 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:06.600000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.12",
+    "dst_host": "db-01",
+    "dst_port": 5432,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.12:5432 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:06.800000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.12",
+    "dst_host": "db-01",
+    "dst_port": 9100,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.12:9100 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:07.500000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.10",
+    "dst_host": "web-01",
+    "dst_port": 22,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.10:22 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:07.700000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.10",
+    "dst_host": "web-01",
+    "dst_port": 80,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.10:80 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:07.900000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.10",
+    "dst_host": "web-01",
+    "dst_port": 443,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.10:443 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:08.100000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.10",
+    "dst_host": "web-01",
+    "dst_port": 5432,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.10:5432 allowed by rule monitoring-checks"
+   }
+  },
+  {
+   "source": "firewall",
+   "event_type": "connection_attempt",
+   "timestamp": "2026-11-02T09:00:08.300000+00:00",
+   "raw_data": {
+    "src_ip": "10.0.0.5",
+    "src_host": "mon-01",
+    "dst_ip": "10.0.1.10",
+    "dst_host": "web-01",
+    "dst_port": 9100,
+    "protocol": "tcp",
+    "action": "allow",
+    "rule": "monitoring-checks",
+    "message": "TCP SYN 10.0.0.5 (mon-01) -> 10.0.1.10:9100 allowed by rule monitoring-checks"
+   }
+  }
+ ]
+}

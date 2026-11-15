@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb;
+  --surface-2: #f4f3ef;
+  --ink: #1c1c1a;
+  --ink-2: #5b5a53;
+  --ink-3: #85847b;
+  --line: #e1e0d9;
+  --accent: #2a78d6;
+  /* chart series: agent, baseline (validated for both surfaces) */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  /* status */
+  --sev-1: #85847b;
+  --sev-2: #fab219;
+  --sev-3: #ec835a;
+  --sev-4: #d03b3b;
+  --good: #0ca30c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --surface: #1a1a19;
+    --surface-2: #232321;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --ink-3: #908f85;
+    --line: #2c2c2a;
+    --accent: #3987e5;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+  }
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-good: var(--good);
+  --color-critical: var(--sev-4);
+}
+
+body {
+  background: var(--surface);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

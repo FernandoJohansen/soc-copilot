@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
+
+jobs:
+  backend:
+    name: Lint and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -r backend/requirements-dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest -v
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  eval:
+    name: Evals (agent vs. baseline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: soc
+          POSTGRES_PASSWORD: soc
+          POSTGRES_DB: soc_copilot
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U soc -d soc_copilot"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://soc:soc@localhost:5432/soc_copilot
+      LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'claude' }}
+      # Without a key (for example on pull requests from forks) the agent tests are
+      # skipped and only the baseline column is produced.
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -r backend/requirements-dev.txt
+      - name: Seed MITRE ATT&CK techniques
+        run: python backend/scripts/seed_mitre.py
+      - name: Run the eval suite
+        timeout-minutes: 5
+        run: pytest backend/tests/evals -m eval -v
+      - name: Summarize
+        if: always()
+        run: python backend/scripts/update_readme.py --stdout >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: evals/results.json
