@@ -1,5 +1,7 @@
 # SOC Copilot
 
+**English** · [Português (Brasil)](README.pt-BR.md)
+
 An LLM agent that turns a batch of security logs into a short list of explained incidents: severity, MITRE ATT&CK technique, a plain-language summary and suggested next steps. Every answer is measured against a deterministic Sigma-style rule baseline.
 
 <!-- Add after deploy: live demo link and a 20-second GIF. -->
