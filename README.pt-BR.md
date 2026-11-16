@@ -9,19 +9,19 @@ Um agente de LLM que transforma um lote de logs de segurança em uma lista curta
 ## Resultados dos evals
 
 <!-- EVAL_RESULTS_START -->
-| Métrica | Regras estilo Sigma | Agente LLM (qwen2.5:3b) | Meta |
+| Métrica | Regras estilo Sigma | Agente LLM (qwen2.5:7b) | Meta |
 | --- | ---: | ---: | ---: |
-| Recall de detecção | 56% | 60% |  |
-| Precisão de detecção | 65% | 81% |  |
-| Acerto de gravidade | 56% | 33% | ≥ 75% |
-| Acerto de tática ATT&CK | 56% | 51% | ≥ 70% |
-| Acerto de técnica ATT&CK | 56% | 49% | ≥ 65% |
-| Falsos positivos em atividade benigna | 13 de 24 | 6 de 24 | |
-| Recall de detecção em ataques evasivos | 0% | 47% | |
-| Latência p95 por análise | 0,6 ms | 184,2 s | < 10 s |
+| Recall de detecção | 56% | 88% |  |
+| Precisão de detecção | 65% | 72% |  |
+| Acerto de gravidade | 56% | 28% | ≥ 75% |
+| Acerto de tática ATT&CK | 56% | 77% | ≥ 70% |
+| Acerto de técnica ATT&CK | 56% | 74% | ≥ 65% |
+| Falsos positivos em atividade benigna | 13 de 24 | 15 de 24 | |
+| Recall de detecção em ataques evasivos | 0% | 89% | |
+| Latência p95 por análise | 0,6 ms | 391,1 s | < 10 s |
 | Custo de LLM por análise | $0 | $0,0000 | |
 
-67 entradas rotuladas: 43 ataques e 24 benignas, 15 delas separadas como conjunto de teste. O acerto é calculado sobre os ataques, e um ataque não detectado conta como erro. Rodada do agente: 2026-11-15.
+67 entradas rotuladas: 43 ataques e 24 benignas, 15 delas separadas como conjunto de teste. O acerto é calculado sobre os ataques, e um ataque não detectado conta como erro. Rodada do agente: 2026-11-16.
 <!-- EVAL_RESULTS_END -->
 
 A tabela é gerada a partir de [`evals/results.json`](evals/results.json) por `python backend/scripts/update_readme.py`, que atualiza este arquivo e a versão em inglês.
