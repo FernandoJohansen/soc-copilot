@@ -11,14 +11,14 @@ An LLM agent that turns a batch of security logs into a short list of explained 
 <!-- EVAL_RESULTS_START -->
 | Metric | Sigma-style rules | LLM agent (qwen2.5:7b) | Target |
 | --- | ---: | ---: | ---: |
-| Detection recall | 56% | 88% |  |
-| Detection precision | 65% | 72% |  |
-| Severity accuracy | 56% | 28% | ≥ 75% |
-| ATT&CK tactic accuracy | 56% | 77% | ≥ 70% |
-| ATT&CK technique accuracy | 56% | 74% | ≥ 65% |
-| False positives on benign activity | 13 of 24 | 15 of 24 | |
-| Detection recall on evasive attacks | 0% | 89% | |
-| Latency p95 per analysis | 0.6 ms | 391.1 s | < 10 s |
+| Detection recall | 56% | 95% |  |
+| Detection precision | 65% | 69% |  |
+| Severity accuracy | 56% | 65% | ≥ 75% |
+| ATT&CK tactic accuracy | 56% | 70% | ≥ 70% |
+| ATT&CK technique accuracy | 56% | 70% | ≥ 65% |
+| False positives on benign activity | 13 of 24 | 18 of 24 | |
+| Detection recall on evasive attacks | 0% | 95% | |
+| Latency p95 per analysis | 0.5 ms | 369.0 s | < 10 s |
 | LLM cost per analysis | $0 | $0.0000 | |
 
 67 labelled entries: 43 attacks and 24 benign, 15 of them held out. Accuracy is over the attack entries, and a missed attack counts as wrong. Agent run: 2026-11-16.
@@ -141,7 +141,7 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - **Correlate in code, classify with the LLM.** Events are grouped by shared IP or user within a time window before the model sees them, so the model reads one candidate incident at a time and cost scales with incidents, not log lines.
 - **Rules run first and stay.** The Sigma-style rules are the comparison floor in the evals and the fallback when the LLM is down, rate-limited or declines.
 - **RAG instead of the whole ATT&CK matrix in the prompt.** pgvector returns the five closest techniques. On the golden attacks the right technique is in the top five for 42 of 43 entries and in the top three for 34, which is why the default is five.
-- **A written severity policy.** One four-level policy (`backend/app/services/severity.py`) is shared by the rules, the prompt and the labels, so a severity disagreement is a judgement about the events and not about the scale.
+- **A written severity policy.** One four-level policy (`backend/app/services/severity.py`) is shared by the rules, the prompt and the labels, so a severity disagreement is a judgement about the events and not about the scale. The model does not write the number: it names the attack stage (none, reconnaissance, attempt, success) and the code maps it onto the scale. With qwen2.5:7b this raised severity accuracy from 28% to 65%.
 - **The agent can say "not an incident".** Benign entries make up a third of the dataset, so false positives are measured and not assumed away.
 - **Pluggable provider.** `LLM_PROVIDER` switches between Claude, OpenAI and Ollama behind one interface, to compare cost and quality on the same evals. The default is a small local model so the project runs with no account and no key.
 - **Refusal fallback.** Security logs can trip a model's safety classifiers. The Claude provider opts in to server-side fallback, which re-runs a declined request on another model inside the same call.
@@ -155,6 +155,7 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - The agent suggests actions and never executes them.
 - Redis is in the stack but not used yet.
 - The default local model is small (3 billion parameters) and slow on CPU, well over the 10-second latency target. A hosted model or a GPU changes both.
+- With the attack stage, qwen2.5:7b overuses "success": port scans and failed brute force often come out critical, the stage pulls some tactics toward Lateral Movement (tactic accuracy fell from 77% to 70%), and most false positives are rated critical. The next step is to cap severity by tactic in code and decide success from the events.
 
 ## Next steps
 

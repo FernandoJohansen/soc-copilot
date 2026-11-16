@@ -10,6 +10,11 @@ class AnalysisResult(BaseModel):
 
     is_incident: bool = True
     severity: int = Field(default=3, description="1 low, 2 medium, 3 high, 4 critical")
+    attack_stage: str | None = Field(
+        default=None,
+        description="none, reconnaissance, attempt or success; the LLM's severity is derived "
+        "from it",
+    )
     summary: str = ""
     mitre_tactic: str | None = None
     mitre_technique_id: str | None = None

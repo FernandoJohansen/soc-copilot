@@ -11,14 +11,14 @@ Um agente de LLM que transforma um lote de logs de segurança em uma lista curta
 <!-- EVAL_RESULTS_START -->
 | Métrica | Regras estilo Sigma | Agente LLM (qwen2.5:7b) | Meta |
 | --- | ---: | ---: | ---: |
-| Recall de detecção | 56% | 88% |  |
-| Precisão de detecção | 65% | 72% |  |
-| Acerto de gravidade | 56% | 28% | ≥ 75% |
-| Acerto de tática ATT&CK | 56% | 77% | ≥ 70% |
-| Acerto de técnica ATT&CK | 56% | 74% | ≥ 65% |
-| Falsos positivos em atividade benigna | 13 de 24 | 15 de 24 | |
-| Recall de detecção em ataques evasivos | 0% | 89% | |
-| Latência p95 por análise | 0,6 ms | 391,1 s | < 10 s |
+| Recall de detecção | 56% | 95% |  |
+| Precisão de detecção | 65% | 69% |  |
+| Acerto de gravidade | 56% | 65% | ≥ 75% |
+| Acerto de tática ATT&CK | 56% | 70% | ≥ 70% |
+| Acerto de técnica ATT&CK | 56% | 70% | ≥ 65% |
+| Falsos positivos em atividade benigna | 13 de 24 | 18 de 24 | |
+| Recall de detecção em ataques evasivos | 0% | 95% | |
+| Latência p95 por análise | 0,5 ms | 369,0 s | < 10 s |
 | Custo de LLM por análise | $0 | $0,0000 | |
 
 67 entradas rotuladas: 43 ataques e 24 benignas, 15 delas separadas como conjunto de teste. O acerto é calculado sobre os ataques, e um ataque não detectado conta como erro. Rodada do agente: 2026-11-16.
@@ -141,7 +141,7 @@ Para regenerar o dataset rotulado depois de mudar os geradores: `python backend/
 - **Correlacionar no código, classificar com o LLM.** Os eventos são agrupados por IP ou usuário em comum, dentro de uma janela de tempo, antes de o modelo vê-los. Assim o modelo lê um incidente candidato por vez, e o custo cresce com o número de incidentes, não de linhas de log.
 - **As regras rodam primeiro e continuam.** As regras estilo Sigma são o piso de comparação nos evals e o fallback quando o LLM está fora do ar, limitado ou recusa a resposta.
 - **RAG em vez da matriz ATT&CK inteira no prompt.** O pgvector devolve as cinco técnicas mais próximas. Nos ataques do dataset, a técnica certa está entre as cinco primeiras em 42 de 43 entradas e entre as três primeiras em 34, por isso o padrão é cinco.
-- **Uma política de gravidade escrita.** Uma única política de quatro níveis (`backend/app/services/severity.py`) é compartilhada pelas regras, pelo prompt e pelos rótulos. Assim, uma divergência de gravidade é um julgamento sobre os eventos, não sobre a escala.
+- **Uma política de gravidade escrita.** Uma única política de quatro níveis (`backend/app/services/severity.py`) é compartilhada pelas regras, pelo prompt e pelos rótulos. Assim, uma divergência de gravidade é um julgamento sobre os eventos, não sobre a escala. O modelo não escreve o número: ele nomeia o estágio do ataque (nenhum, reconhecimento, tentativa, sucesso) e o código converte para a escala. Com o qwen2.5:7b, isso levou o acerto de gravidade de 28% para 65%.
 - **O agente pode dizer "não é incidente".** As entradas benignas são um terço do dataset, então os falsos positivos são medidos, não ignorados.
 - **Provedor plugável.** O `LLM_PROVIDER` alterna entre Claude, OpenAI e Ollama atrás de uma única interface, para comparar custo e qualidade nos mesmos evals. O padrão é um modelo local pequeno, para o projeto rodar sem conta e sem chave.
 - **Fallback de recusa.** Logs de segurança podem disparar os filtros de segurança de um modelo. O provedor Claude usa o fallback no servidor, que reexecuta uma requisição recusada em outro modelo dentro da mesma chamada.
@@ -155,6 +155,7 @@ Para regenerar o dataset rotulado depois de mudar os geradores: `python backend/
 - O agente sugere ações e nunca as executa.
 - O Redis está na stack, mas ainda não é usado.
 - O modelo local padrão é pequeno (3 bilhões de parâmetros) e lento em CPU, bem acima da meta de 10 segundos de latência. Um modelo hospedado ou uma GPU mudam as duas coisas.
+- Com o estágio do ataque, o qwen2.5:7b usa "sucesso" demais: port scans e brute force sem login costumam sair como críticos, o estágio puxa algumas táticas para Lateral Movement (o acerto de tática caiu de 77% para 70%) e a maioria dos falsos positivos sai como crítica. O próximo passo é limitar a gravidade por tática no código e decidir o sucesso a partir dos eventos.
 
 ## Próximos passos
 

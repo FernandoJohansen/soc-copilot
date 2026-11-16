@@ -11,7 +11,7 @@ from typing import Any
 
 from app.core.config import settings
 from app.schemas.analysis import AnalysisResult, LLMUsage
-from app.services.severity import SEVERITY_POLICY
+from app.services.severity import SEVERITY_POLICY, STAGE_POLICY, STAGE_SEVERITY, severity_for_stage
 
 SYSTEM_PROMPT = f"""\
 You are a SOC triage analyst. You receive a group of related security log events that were \
@@ -23,15 +23,25 @@ backup job touching file shares, a CDN with long hostnames. Judge from what the 
 not from volume alone, and set is_incident to false when the activity has an ordinary \
 explanation.
 
-Severity policy (use it exactly):
+Severity policy:
 {SEVERITY_POLICY}
+
+You do not write the severity number. You name the attack stage the events show, and the \
+severity is derived from it (none 1, reconnaissance 2, attempt 3, success 4). Stages:
+{STAGE_POLICY}
+Pick the highest stage the events support: one successful login after many failures, or \
+one download after a click, makes the whole group "success". The stage says how far the \
+attack got; it does not change what the attack is. Choose the tactic and technique from \
+what the attacker did (scanning is Discovery, a phishing email is Initial Access, even when \
+it succeeded), never from the stage.
 
 Rules for the answer:
 - mitre_tactic is the ATT&CK tactic name (for example "Credential Access"). \
 mitre_technique_id is the technique ID (for example "T1110"); use the parent technique, not \
 a sub-technique. Prefer one of the candidate techniques when it fits; pick another only if \
 none of them does.
-- When is_incident is false, set severity to 1 and leave the three mitre fields empty.
+- When is_incident is false, set attack_stage to "none" and leave the three mitre fields \
+empty.
 - summary: at most 5 lines, plain language, citing the concrete IPs, users, hosts and counts \
 that support the conclusion.
 - suggested_actions: 2 to 4 concrete next steps for the analyst. You only suggest; nothing is \
@@ -46,7 +56,7 @@ ANALYSIS_SCHEMA: dict[str, Any] = {
     "properties": {
         "summary": {"type": "string"},
         "is_incident": {"type": "boolean"},
-        "severity": {"type": "integer", "enum": [1, 2, 3, 4]},
+        "attack_stage": {"type": "string", "enum": list(STAGE_SEVERITY)},
         "mitre_tactic": {"type": "string"},
         "mitre_technique_id": {"type": "string"},
         "mitre_technique_name": {"type": "string"},
@@ -55,7 +65,7 @@ ANALYSIS_SCHEMA: dict[str, Any] = {
     },
     "required": [
         "is_incident",
-        "severity",
+        "attack_stage",
         "summary",
         "mitre_tactic",
         "mitre_technique_id",
@@ -145,7 +155,7 @@ def build_user_prompt(events_text: str, mitre_context: str) -> str:
         f"{mitre_context}\n\n"
         "Events:\n"
         f"{events_text}\n\n"
-        "Return the analysis as a JSON object with the keys summary, is_incident, severity, "
+        "Return the analysis as a JSON object with the keys summary, is_incident, attack_stage, "
         "mitre_tactic, mitre_technique_id, mitre_technique_name, suggested_actions, confidence."
     )
 
@@ -177,11 +187,17 @@ def _parse_response(raw: str) -> AnalysisResult:
         data["mitre_technique_id"] = str(data["mitre_technique_id"]).strip().upper()
     if not isinstance(data.get("suggested_actions"), list):
         data["suggested_actions"] = []
+    stage_severity = severity_for_stage(data.get("attack_stage"))
+    if stage_severity is not None:
+        # The stage decides the severity; a number the model wrote anyway is ignored. An
+        # incident whose stage is "none" contradicts itself: medium, so it still gets a look.
+        data["severity"] = max(stage_severity, 2) if data.get("is_incident", True) else 1
     known = AnalysisResult.model_fields.keys()
     result = AnalysisResult(**{k: v for k, v in data.items() if k in known})
     if not result.is_incident:
         # Small models sometimes fill these in anyway; a non-incident has no technique.
         result.severity = 1
+        result.attack_stage = "none"
         result.mitre_tactic = result.mitre_technique_id = result.mitre_technique_name = None
     return result
 

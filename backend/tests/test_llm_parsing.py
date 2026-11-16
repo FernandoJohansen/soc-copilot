@@ -113,3 +113,35 @@ def test_format_events_drops_redundant_text():
     assert line.startswith("2026-11-02T10:00:05Z dns query ")
     assert "message=" not in line
     assert "[93 chars]" in line
+
+
+@pytest.mark.parametrize(
+    ("stage", "severity"), [("reconnaissance", 2), ("attempt", 3), ("success", 4)]
+)
+def test_attack_stage_sets_the_severity(stage, severity):
+    # The model also wrote severity 1; the stage wins.
+    answer = VALID | {"attack_stage": stage, "severity": 1}
+    result = _parse_response(json.dumps(answer))
+    assert (result.attack_stage, result.severity) == (stage, severity)
+
+
+def test_incident_with_stage_none_is_medium():
+    result = _parse_response(json.dumps(VALID | {"attack_stage": "none"}))
+    assert (result.is_incident, result.severity) == (True, 2)
+
+
+def test_non_incident_is_severity_1_whatever_the_stage():
+    answer = VALID | {"is_incident": False, "attack_stage": "success"}
+    result = _parse_response(json.dumps(answer))
+    assert (result.severity, result.attack_stage, result.mitre_tactic) == (1, "none", None)
+
+
+def test_unknown_stage_keeps_the_written_severity():
+    result = _parse_response(json.dumps(VALID | {"attack_stage": "exploitation"}))
+    assert result.severity == 4
+
+
+def test_schema_asks_for_the_stage_not_the_number():
+    properties = llm.ANALYSIS_SCHEMA["properties"]
+    assert "severity" not in properties
+    assert properties["attack_stage"]["enum"] == ["none", "reconnaissance", "attempt", "success"]
