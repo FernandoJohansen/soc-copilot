@@ -11,17 +11,17 @@ Um agente de LLM que transforma um lote de logs de segurança em uma lista curta
 <!-- EVAL_RESULTS_START -->
 | Métrica | Regras estilo Sigma | Agente LLM (qwen2.5:7b) | Meta |
 | --- | ---: | ---: | ---: |
-| Recall de detecção | 56% | 95% |  |
-| Precisão de detecção | 65% | 69% |  |
-| Acerto de gravidade | 56% | 65% | ≥ 75% |
-| Acerto de tática ATT&CK | 56% | 70% | ≥ 70% |
-| Acerto de técnica ATT&CK | 56% | 70% | ≥ 65% |
+| Recall de detecção | 56% | 98% |  |
+| Precisão de detecção | 65% | 70% |  |
+| Acerto de gravidade | 56% | 98% | ≥ 75% |
+| Acerto de tática ATT&CK | 56% | 72% | ≥ 70% |
+| Acerto de técnica ATT&CK | 56% | 72% | ≥ 65% |
 | Falsos positivos em atividade benigna | 13 de 24 | 18 de 24 | |
 | Recall de detecção em ataques evasivos | 0% | 95% | |
-| Latência p95 por análise | 0,5 ms | 369,0 s | < 10 s |
+| Latência p95 por análise | 0,4 ms | 363,7 s | < 10 s |
 | Custo de LLM por análise | $0 | $0,0000 | |
 
-67 entradas rotuladas: 43 ataques e 24 benignas, 15 delas separadas como conjunto de teste. O acerto é calculado sobre os ataques, e um ataque não detectado conta como erro. Rodada do agente: 2026-11-16.
+67 entradas rotuladas: 43 ataques e 24 benignas, 15 delas separadas como conjunto de teste. O acerto é calculado sobre os ataques, e um ataque não detectado conta como erro. Rodada do agente: 2026-11-18.
 <!-- EVAL_RESULTS_END -->
 
 A tabela é gerada a partir de [`evals/results.json`](evals/results.json) por `python backend/scripts/update_readme.py`, que atualiza este arquivo e a versão em inglês.
@@ -142,6 +142,7 @@ Para regenerar o dataset rotulado depois de mudar os geradores: `python backend/
 - **As regras rodam primeiro e continuam.** As regras estilo Sigma são o piso de comparação nos evals e o fallback quando o LLM está fora do ar, limitado ou recusa a resposta.
 - **RAG em vez da matriz ATT&CK inteira no prompt.** O pgvector devolve as cinco técnicas mais próximas. Nos ataques do dataset, a técnica certa está entre as cinco primeiras em 42 de 43 entradas e entre as três primeiras em 34, por isso o padrão é cinco.
 - **Uma política de gravidade escrita.** Uma única política de quatro níveis (`backend/app/services/severity.py`) é compartilhada pelas regras, pelo prompt e pelos rótulos. Assim, uma divergência de gravidade é um julgamento sobre os eventos, não sobre a escala. O modelo não escreve o número: ele nomeia o estágio do ataque (nenhum, reconhecimento, tentativa, sucesso) e o código converte para a escala. Com o qwen2.5:7b, isso levou o acerto de gravidade de 28% para 65%.
+- **Os eventos seguram o modelo.** Sozinho, o qwen2.5:7b chamava a maioria dos port scans e dos brute force sem login de "sucesso". O `backend/app/services/evidence.py` procura passos de ataque nos eventos (login depois de falhas repetidas, download, uma origem alcançando outros hosts, formato de túnel DNS, e-mail suspeito, varredura) e limita o estágio ao que eles mostram, o que levou o acerto de gravidade de 65% para 98%. Quando os eventos não mostram nenhum passo de ataque, o "incidente" do modelo é derrubado. As duas coisas só valem quando todos os eventos são de tipos que as checagens sabem ler; no resto, quem decide é o modelo.
 - **O agente pode dizer "não é incidente".** As entradas benignas são um terço do dataset, então os falsos positivos são medidos, não ignorados.
 - **Provedor plugável.** O `LLM_PROVIDER` alterna entre Claude, OpenAI e Ollama atrás de uma única interface, para comparar custo e qualidade nos mesmos evals. O padrão é um modelo local pequeno, para o projeto rodar sem conta e sem chave.
 - **Fallback de recusa.** Logs de segurança podem disparar os filtros de segurança de um modelo. O provedor Claude usa o fallback no servidor, que reexecuta uma requisição recusada em outro modelo dentro da mesma chamada.
@@ -155,8 +156,10 @@ Para regenerar o dataset rotulado depois de mudar os geradores: `python backend/
 - O agente sugere ações e nunca as executa.
 - O Redis está na stack, mas ainda não é usado.
 - O modelo local padrão é pequeno (3 bilhões de parâmetros) e lento em CPU, bem acima da meta de 10 segundos de latência. Um modelo hospedado ou uma GPU mudam as duas coisas.
-- Com o estágio do ataque, o qwen2.5:7b usa "sucesso" demais: port scans e brute force sem login costumam sair como críticos, o estágio puxa algumas táticas para Lateral Movement (o acerto de tática caiu de 77% para 70%) e a maioria dos falsos positivos sai como crítica. O próximo passo é limitar a gravidade por tática no código e decidir o sucesso a partir dos eventos.
+- Falsos positivos: 18 das 24 entradas benignas na rodada medida. O veto aos grupos sem passo de ataque veio depois dessa rodada; passando as respostas dela por ele, sobram 7, mas uma rodada completa ainda não confirmou. Os 7 restantes (um runner de CI com chave vencida, o job de backup) são iguais aos ataques nos eventos e pedem um inventário de ativos conhecidos, não mais checagens.
+- As checagens de evidência foram escritas olhando o dataset, então o conjunto de teste separado é a medida mais justa: gravidade de 9 em 10 ali.
+- O estágio do ataque ainda puxa algumas táticas para Lateral Movement (acerto de tática de 72%, contra 77% antes do estágio).
 
 ## Próximos passos
 
-Rodar os evals do agente e publicar os números, publicar uma demo, adicionar uma nota de LLM-as-judge para a qualidade das explicações e, depois, trocar o dataset sintético por ataques capturados em laboratório.
+Medir o veto aos falsos positivos numa rodada completa, adicionar um inventário de ativos conhecidos, rodar uma vez com um modelo hospedado para ter latência e custo reais, publicar uma demo, adicionar uma nota de LLM-as-judge para a qualidade das explicações e, depois, trocar o dataset sintético por ataques capturados em laboratório.

@@ -11,17 +11,17 @@ An LLM agent that turns a batch of security logs into a short list of explained 
 <!-- EVAL_RESULTS_START -->
 | Metric | Sigma-style rules | LLM agent (qwen2.5:7b) | Target |
 | --- | ---: | ---: | ---: |
-| Detection recall | 56% | 95% |  |
-| Detection precision | 65% | 69% |  |
-| Severity accuracy | 56% | 65% | ≥ 75% |
-| ATT&CK tactic accuracy | 56% | 70% | ≥ 70% |
-| ATT&CK technique accuracy | 56% | 70% | ≥ 65% |
+| Detection recall | 56% | 98% |  |
+| Detection precision | 65% | 70% |  |
+| Severity accuracy | 56% | 98% | ≥ 75% |
+| ATT&CK tactic accuracy | 56% | 72% | ≥ 70% |
+| ATT&CK technique accuracy | 56% | 72% | ≥ 65% |
 | False positives on benign activity | 13 of 24 | 18 of 24 | |
 | Detection recall on evasive attacks | 0% | 95% | |
-| Latency p95 per analysis | 0.5 ms | 369.0 s | < 10 s |
+| Latency p95 per analysis | 0.4 ms | 363.7 s | < 10 s |
 | LLM cost per analysis | $0 | $0.0000 | |
 
-67 labelled entries: 43 attacks and 24 benign, 15 of them held out. Accuracy is over the attack entries, and a missed attack counts as wrong. Agent run: 2026-11-16.
+67 labelled entries: 43 attacks and 24 benign, 15 of them held out. Accuracy is over the attack entries, and a missed attack counts as wrong. Agent run: 2026-11-18.
 <!-- EVAL_RESULTS_END -->
 
 The table is generated from [`evals/results.json`](evals/results.json) by `python backend/scripts/update_readme.py`.
@@ -142,6 +142,7 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - **Rules run first and stay.** The Sigma-style rules are the comparison floor in the evals and the fallback when the LLM is down, rate-limited or declines.
 - **RAG instead of the whole ATT&CK matrix in the prompt.** pgvector returns the five closest techniques. On the golden attacks the right technique is in the top five for 42 of 43 entries and in the top three for 34, which is why the default is five.
 - **A written severity policy.** One four-level policy (`backend/app/services/severity.py`) is shared by the rules, the prompt and the labels, so a severity disagreement is a judgement about the events and not about the scale. The model does not write the number: it names the attack stage (none, reconnaissance, attempt, success) and the code maps it onto the scale. With qwen2.5:7b this raised severity accuracy from 28% to 65%.
+- **The events hold the model to account.** Left alone, qwen2.5:7b called most port scans and failed brute force "success". `backend/app/services/evidence.py` checks the events for attack steps (a login after repeated failures, a download, one source reaching other hosts, a DNS-tunnel shape, a suspicious email, a scan) and caps the stage at what they show, which raised severity accuracy from 65% to 98%. When the events show no attack step at all, the model's "incident" is overruled. Both apply only when every event is of a kind the checks can read, so the model still decides on anything they do not describe.
 - **The agent can say "not an incident".** Benign entries make up a third of the dataset, so false positives are measured and not assumed away.
 - **Pluggable provider.** `LLM_PROVIDER` switches between Claude, OpenAI and Ollama behind one interface, to compare cost and quality on the same evals. The default is a small local model so the project runs with no account and no key.
 - **Refusal fallback.** Security logs can trip a model's safety classifiers. The Claude provider opts in to server-side fallback, which re-runs a declined request on another model inside the same call.
@@ -155,8 +156,10 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - The agent suggests actions and never executes them.
 - Redis is in the stack but not used yet.
 - The default local model is small (3 billion parameters) and slow on CPU, well over the 10-second latency target. A hosted model or a GPU changes both.
-- With the attack stage, qwen2.5:7b overuses "success": port scans and failed brute force often come out critical, the stage pulls some tactics toward Lateral Movement (tactic accuracy fell from 77% to 70%), and most false positives are rated critical. The next step is to cap severity by tactic in code and decide success from the events.
+- False positives: 18 of 24 benign entries in the measured run. The veto on groups with no attack step came after that run; replaying the run's answers through it gives 7, but a full run has not confirmed it yet. The 7 left (a CI runner with an expired key, the backup job) look the same as the attacks in the events, and need an inventory of known assets rather than more checks.
+- The evidence checks were written with the dataset in view, so the held-out entries are the fairer measure: severity 9 of 10 there.
+- The attack stage still pulls some tactics toward Lateral Movement (tactic accuracy 72%, down from 77% before the stage was added).
 
 ## Next steps
 
-Run the agent evals and publish the numbers, deploy a public demo, add an LLM-as-judge score for explanation quality, then replace the synthetic dataset with attacks captured in a lab.
+Measure the false-positive veto in a full run, add an inventory of known assets, run once on a hosted model for real latency and cost, deploy a public demo, add an LLM-as-judge score for explanation quality, then replace the synthetic dataset with attacks captured in a lab.

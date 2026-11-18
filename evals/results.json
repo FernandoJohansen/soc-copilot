@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-16T06:24:16+00:00",
+  "generated_at": "2026-11-18T06:26:36+00:00",
   "dataset": {
     "entries": 67,
     "attacks": 43,
@@ -24,7 +24,7 @@
       "severity_accuracy": 0.5581,
       "tactic_accuracy": 0.5581,
       "technique_accuracy": 0.5581,
-      "latency_p95_ms": 0.5,
+      "latency_p95_ms": 0.4,
       "cost_per_incident_usd": 0.0,
       "errors": 0
     },
@@ -53,7 +53,7 @@
         "severity_accuracy": 1.0,
         "tactic_accuracy": 1.0,
         "technique_accuracy": 1.0,
-        "latency_p95_ms": 0.5,
+        "latency_p95_ms": 0.4,
         "cost_per_incident_usd": 0.0,
         "errors": 0
       },
@@ -67,7 +67,7 @@
         "severity_accuracy": 0.0,
         "tactic_accuracy": 0.0,
         "technique_accuracy": 0.0,
-        "latency_p95_ms": 0.7,
+        "latency_p95_ms": 0.6,
         "cost_per_incident_usd": 0.0,
         "errors": 0
       },
@@ -607,44 +607,44 @@
       "n": 67,
       "attacks": 43,
       "benign": 24,
-      "detection_recall": 0.9535,
-      "detection_precision": 0.6949,
+      "detection_recall": 0.9767,
+      "detection_precision": 0.7,
       "false_positives": 18,
-      "severity_accuracy": 0.6512,
-      "tactic_accuracy": 0.6977,
-      "technique_accuracy": 0.6977,
-      "latency_p95_ms": 368974.1,
+      "severity_accuracy": 0.9767,
+      "tactic_accuracy": 0.7209,
+      "technique_accuracy": 0.7209,
+      "latency_p95_ms": 363708.5,
       "cost_per_incident_usd": 0.0,
-      "errors": 1
+      "errors": 0
     },
     "held_out": {
       "n": 15,
       "attacks": 10,
       "benign": 5,
-      "detection_recall": 0.8,
-      "detection_precision": 0.6667,
+      "detection_recall": 0.9,
+      "detection_precision": 0.6923,
       "false_positives": 4,
-      "severity_accuracy": 0.5,
-      "tactic_accuracy": 0.6,
-      "technique_accuracy": 0.6,
-      "latency_p95_ms": 600167.6,
+      "severity_accuracy": 0.9,
+      "tactic_accuracy": 0.7,
+      "technique_accuracy": 0.7,
+      "latency_p95_ms": 592529.5,
       "cost_per_incident_usd": 0.0,
-      "errors": 1
+      "errors": 0
     },
     "by_kind": {
       "standard": {
         "n": 24,
         "attacks": 24,
         "benign": 0,
-        "detection_recall": 0.9583,
+        "detection_recall": 1.0,
         "detection_precision": 1.0,
         "false_positives": 0,
-        "severity_accuracy": 0.6667,
-        "tactic_accuracy": 0.625,
-        "technique_accuracy": 0.625,
-        "latency_p95_ms": 368974.1,
+        "severity_accuracy": 1.0,
+        "tactic_accuracy": 0.6667,
+        "technique_accuracy": 0.6667,
+        "latency_p95_ms": 364253.1,
         "cost_per_incident_usd": 0.0,
-        "errors": 1
+        "errors": 0
       },
       "evasive": {
         "n": 19,
@@ -653,10 +653,10 @@
         "detection_recall": 0.9474,
         "detection_precision": 1.0,
         "false_positives": 0,
-        "severity_accuracy": 0.6316,
+        "severity_accuracy": 0.9474,
         "tactic_accuracy": 0.7895,
         "technique_accuracy": 0.7895,
-        "latency_p95_ms": 471097.5,
+        "latency_p95_ms": 415644.6,
         "cost_per_incident_usd": 0.0,
         "errors": 0
       },
@@ -670,28 +670,12 @@
         "severity_accuracy": null,
         "tactic_accuracy": null,
         "technique_accuracy": null,
-        "latency_p95_ms": 307750.3,
+        "latency_p95_ms": 265914.4,
         "cost_per_incident_usd": 0.0,
         "errors": 0
       }
     },
     "misses": [
-      {
-        "id": "brute_force_ssh-burst-1",
-        "expected": {
-          "is_incident": true,
-          "severity": 3,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "error": null
-      },
       {
         "id": "brute_force_ssh-burst-3",
         "expected": {
@@ -702,7 +686,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 3,
           "mitre_tactic": "Lateral Movement",
           "mitre_technique": "T1021"
         },
@@ -718,7 +702,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 2,
           "mitre_tactic": "Lateral Movement",
           "mitre_technique": "T1071"
         },
@@ -734,7 +718,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 2,
           "mitre_tactic": "Lateral Movement",
           "mitre_technique": "T1021"
         },
@@ -750,7 +734,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 2,
           "mitre_tactic": "Lateral Movement",
           "mitre_technique": "T1021"
         },
@@ -766,7 +750,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 2,
           "mitre_tactic": "Lateral Movement",
           "mitre_technique": "T1071"
         },
@@ -782,7 +766,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 3,
           "mitre_tactic": "Credential Access",
           "mitre_technique": "T1110"
         },
@@ -821,70 +805,6 @@
         "error": null
       },
       {
-        "id": "dns_exfiltration-fast_tunnel-5",
-        "expected": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Exfiltration",
-          "mitre_technique": "T1048"
-        },
-        "got": {
-          "is_incident": false,
-          "severity": null,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "error": "Ollama did not answer within 600 s."
-      },
-      {
-        "id": "brute_force_ssh-low_and_slow-1",
-        "expected": {
-          "is_incident": true,
-          "severity": 3,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "error": null
-      },
-      {
-        "id": "brute_force_ssh-low_and_slow-3",
-        "expected": {
-          "is_incident": true,
-          "severity": 3,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "error": null
-      },
-      {
-        "id": "brute_force_ssh-password_spray-1",
-        "expected": {
-          "is_incident": true,
-          "severity": 3,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "error": null
-      },
-      {
         "id": "brute_force_ssh-password_spray-3",
         "expected": {
           "is_incident": true,
@@ -910,7 +830,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 2,
           "mitre_tactic": "Credential Access",
           "mitre_technique": "T1110"
         },
@@ -926,7 +846,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 2,
           "mitre_tactic": "Credential Access",
           "mitre_technique": "T1110"
         },
@@ -945,22 +865,6 @@
           "severity": 4,
           "mitre_tactic": "Exfiltration",
           "mitre_technique": "T1048"
-        },
-        "error": null
-      },
-      {
-        "id": "lateral_movement-two_hosts_psexec-3",
-        "expected": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Lateral Movement",
-          "mitre_technique": "T1021"
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 3,
-          "mitre_tactic": "Lateral Movement",
-          "mitre_technique": "T1021"
         },
         "error": null
       },
@@ -1166,7 +1070,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 2,
+          "severity": 4,
           "mitre_tactic": "Exfiltration",
           "mitre_technique": "T1048"
         },
@@ -1214,7 +1118,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 2,
           "mitre_tactic": "Lateral Movement",
           "mitre_technique": "T1021"
         },
@@ -1230,7 +1134,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 2,
           "mitre_tactic": "Credential Access",
           "mitre_technique": "T1110"
         },
@@ -1246,7 +1150,7 @@
         },
         "got": {
           "is_incident": true,
-          "severity": 4,
+          "severity": 2,
           "mitre_tactic": "Lateral Movement",
           "mitre_technique": "T1021"
         },
@@ -1254,5 +1158,5 @@
       }
     ]
   },
-  "agent_generated_at": "2026-11-16T06:24:16+00:00"
+  "agent_generated_at": "2026-11-18T06:26:36+00:00"
 }
