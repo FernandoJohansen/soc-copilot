@@ -15,9 +15,10 @@ class AnalysisResult(BaseModel):
         description="none, reconnaissance, attempt or success; the LLM's severity is derived "
         "from it",
     )
-    stage_note: str | None = Field(
+    evidence_note: str | None = Field(
         default=None,
-        description="Set when the attack stage was changed to match what the events show",
+        description="Set when the verdict or attack stage was changed to match what the events "
+        "show",
     )
     summary: str = ""
     mitre_tactic: str | None = None

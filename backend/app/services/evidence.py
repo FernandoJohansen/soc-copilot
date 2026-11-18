@@ -1,14 +1,19 @@
-"""What the events prove, checked in code, so the LLM's attack stage can be held to it.
+"""What the events prove, checked in code, so the LLM's verdict can be held to it.
 
 The model names the attack stage, and the severity follows from the stage. Left alone, a
-7B model calls almost everything "success": port scans and failed brute force come out
-critical. These checks do not detect attacks (that is the model's job and the Sigma
-baseline's); they only answer "do the events show this far?". The stage the model gives is
-capped at the highest stage the evidence supports.
+7B model calls almost everything "success" (port scans and failed brute force come out
+critical) and flags ordinary activity as incidents. These checks do not rank or explain
+attacks; that is the model's job. They answer two narrower questions:
 
-The checks are deliberately loose: a benign backup job passes the lateral-movement check,
-and a CDN passes the DNS one. A cap can only lower a stage, so a loose check costs nothing
-on benign groups, while a strict one would wrongly demote real attacks.
+- How far do the events show the attack got? The model's stage is capped there.
+- Do the events show any attack step at all? If not, and every event is of a kind these
+  checks know how to read, the model's "incident" is overruled. Groups with any other kind
+  of event keep the model's verdict, so the agent can still flag attacks nothing here
+  describes.
+
+The checks are deliberately loose: a benign backup job passes the lateral-movement check.
+A loose check only lets the model's answer through, while a strict one would overrule it
+on real attacks.
 """
 
 from collections import defaultdict
@@ -24,8 +29,48 @@ EventDict = dict[str, Any]
 
 STAGES = list(STAGE_SEVERITY)  # none < reconnaissance < attempt < success
 
+# Account-lockout policies commonly trip at 5 failures (CIS recommends 5 or fewer); below
+# that, failed logins are a user mistyping, not password guessing.
+MIN_FAILURES = 5
+
+# One source reaching this many distinct host:port pairs is scanning, not using a service.
+MIN_SCAN_TARGETS = 10
+
 # Below this many distinct names under one domain from one host, DNS is ordinary browsing.
 MIN_TUNNEL_QUERIES = 20
+
+# Large CDNs and clouds serve thousands of random-looking hostnames. DNS-tunnel detection
+# excludes them; a tunnel needs a domain the attacker controls the name server for.
+CDN_DOMAINS = (
+    "akamaiedge.net",
+    "akamaized.net",
+    "amazonaws.com",
+    "azureedge.net",
+    "cloudflare.net",
+    "cloudfront.net",
+    "edgekey.net",
+    "fastly.net",
+    "googleusercontent.com",
+    "googlevideo.com",
+)
+
+# A sender domain younger than this is a classic phishing sign.
+YOUNG_DOMAIN_DAYS = 30
+
+# The event kinds these checks read. A group made only of these, with no finding, is
+# ordinary activity; a group with any other kind is left to the model.
+KNOWN_KINDS = {
+    ("auth.log", "authentication_failure"),
+    ("auth.log", "authentication_success"),
+    ("dns", "query"),
+    ("email_gateway", "email_received"),
+    ("firewall", "connection_attempt"),
+    ("proxy", "file_download"),
+    ("proxy", "url_click"),
+    ("windows_security", "logon"),
+    ("windows_security", "service_install"),
+    ("windows_security", "share_access"),
+}
 
 # A scan finds hosts; it does not get into them, whatever the model says about the stage.
 TACTIC_MAX_STAGE = {"discovery": "reconnaissance"}
@@ -57,17 +102,49 @@ def _of(events: Sequence[EventDict], source: str, event_type: str) -> list[Event
     return [e for e in events if e.get("source") == source and e.get("event_type") == event_type]
 
 
-def _login_after_failures(events: Sequence[EventDict]) -> Finding | None:
-    """A successful login from an IP that had failed before it."""
-    first_failure: dict[str, datetime] = {}
+def _failures_by_ip(events: Sequence[EventDict]) -> dict[str, list[datetime]]:
+    by_ip: dict[str, list[datetime]] = defaultdict(list)
     for e in _of(events, "auth.log", "authentication_failure"):
-        ip = _raw(e, "src_ip")
-        if ip and (ip not in first_failure or _ts(e) < first_failure[ip]):
-            first_failure[ip] = _ts(e)
+        if _raw(e, "src_ip"):
+            by_ip[_raw(e, "src_ip")].append(_ts(e))
+    return {ip: times for ip, times in by_ip.items() if len(times) >= MIN_FAILURES}
+
+
+def _password_guessing(events: Sequence[EventDict]) -> list[Finding]:
+    """Repeated failed logins from one IP; success if that IP then logged in."""
+    guessing = _failures_by_ip(events)
     for e in _of(events, "auth.log", "authentication_success"):
         ip = _raw(e, "src_ip")
-        if ip in first_failure and _ts(e) > first_failure[ip]:
-            return Finding("success", "credential access", f"{ip} logged in after failing")
+        if ip in guessing and _ts(e) > min(guessing[ip]):
+            n = len(guessing[ip])
+            return [Finding("success", "credential access", f"{ip} logged in after {n} failures")]
+    return [
+        Finding("attempt", "credential access", f"{len(times)} failed logins from {ip}")
+        for ip, times in guessing.items()
+    ][:1]
+
+
+def _scan(events: Sequence[EventDict]) -> Finding | None:
+    targets: dict[str, set[tuple[Any, Any]]] = defaultdict(set)
+    for e in _of(events, "firewall", "connection_attempt"):
+        targets[str(_raw(e, "src_ip"))].add((_raw(e, "dst_ip"), _raw(e, "dst_port")))
+    for ip, reached in targets.items():
+        if len(reached) >= MIN_SCAN_TARGETS:
+            return Finding("reconnaissance", "discovery", f"{ip} probed {len(reached)} targets")
+    return None
+
+
+def _suspicious_email(events: Sequence[EventDict]) -> Finding | None:
+    """A delivered email with a phishing sign: a young sender domain, or SPF failing on a
+    message that was not relayed by a mailing list (relaying breaks SPF). An email with
+    neither field known still counts: absent data should not clear it."""
+    for e in _of(events, "email_gateway", "email_received"):
+        age, spf = _raw(e, "sender_domain_age_days"), _raw(e, "spf")
+        young = age is None or age < YOUNG_DOMAIN_DAYS
+        spf_fails = spf in (None, "fail", "softfail") and not _raw(e, "via")
+        if young or spf_fails:
+            sender = _raw(e, "sender") or "an unknown sender"
+            return Finding("attempt", "initial access", f"an email from {sender} was delivered")
     return None
 
 
@@ -104,6 +181,8 @@ def _dns_tunnel_shape(events: Sequence[EventDict]) -> Finding | None:
         key = (str(_raw(e, "src_ip")), str(_raw(e, "domain")))
         names[key].add(str(_raw(e, "query")))
     for (ip, domain), queries in names.items():
+        if domain.endswith(CDN_DOMAINS):
+            continue
         if len(queries) >= MIN_TUNNEL_QUERIES:
             return Finding(
                 "success", "exfiltration", f"{ip} queried {len(queries)} names under {domain}"
@@ -111,18 +190,15 @@ def _dns_tunnel_shape(events: Sequence[EventDict]) -> Finding | None:
     return None
 
 
-def _attempts(events: Sequence[EventDict]) -> list[Finding]:
-    found = []
-    if _of(events, "auth.log", "authentication_failure"):
-        found.append(Finding("attempt", "credential access", "failed logins"))
-    if _of(events, "email_gateway", "email_received"):
-        found.append(Finding("attempt", "initial access", "an email was delivered"))
-    return found
-
-
 def findings(events: Sequence[EventDict]) -> list[Finding]:
-    checks = (_login_after_failures, _download, _internal_spread, _dns_tunnel_shape)
-    return [f for check in checks if (f := check(events))] + _attempts(events)
+    checks = (_download, _internal_spread, _dns_tunnel_shape, _suspicious_email, _scan)
+    return _password_guessing(events) + [f for check in checks if (f := check(events))]
+
+
+def _all_known(events: Sequence[EventDict]) -> bool:
+    return bool(events) and all(
+        (e.get("source"), e.get("event_type")) in KNOWN_KINDS for e in events
+    )
 
 
 def _rank(stage: str | None) -> int:
@@ -130,19 +206,39 @@ def _rank(stage: str | None) -> int:
 
 
 def settle_stage(result: AnalysisResult, events: Sequence[EventDict]) -> AnalysisResult:
-    """Hold the model's attack stage to what the events show, and re-derive the severity.
+    """Hold the model's verdict and attack stage to what the events show, and re-derive
+    the severity.
 
     Returns the result unchanged when it is not an incident or has no stage (the Sigma
-    baseline, an unparseable answer); otherwise a copy with stage, severity and
-    stage_note set.
+    baseline, an unparseable answer); otherwise a copy with the corrections and an
+    evidence_note saying what changed.
     """
     if not result.is_incident or _rank(result.attack_stage) < 0:
         return result
     evidence = findings(events)
+    if not evidence and _all_known(events):
+        return result.model_copy(
+            update={
+                "is_incident": False,
+                "attack_stage": "none",
+                "severity": 1,
+                "mitre_tactic": None,
+                "mitre_technique_id": None,
+                "mitre_technique_name": None,
+                "evidence_note": (
+                    f"Not an incident: the model said {result.attack_stage}, but the events "
+                    "show no attack step (no repeated failed logins, scan, suspicious email, "
+                    "download, spread between hosts or DNS tunnel)."
+                ),
+            }
+        )
     tactic = (result.mitre_tactic or "").strip().lower()
 
     # Anything the model calls an incident is at least reconnaissance, even with no finding.
+    # Events these checks cannot read may show a later stage, so they lift the cap.
     ceiling = max([_rank("reconnaissance")] + [_rank(f.stage) for f in evidence])
+    if not _all_known(events):
+        ceiling = _rank("success")
     stage = min(_rank(result.attack_stage), ceiling)
     if tactic in TACTIC_MAX_STAGE:
         stage = min(stage, _rank(TACTIC_MAX_STAGE[tactic]))
@@ -166,6 +262,6 @@ def settle_stage(result: AnalysisResult, events: Sequence[EventDict]) -> Analysi
         update={
             "attack_stage": settled,
             "severity": STAGE_SEVERITY[settled],
-            "stage_note": note,
+            "evidence_note": note,
         }
     )
