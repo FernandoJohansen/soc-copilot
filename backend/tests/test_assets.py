@@ -109,6 +109,16 @@ def test_an_attack_beside_routine_work_is_judged_on_the_attack_alone():
     assert "bkp-01" in result.evidence_note
 
 
+def test_routine_set_aside_is_noted_even_when_the_stage_stands():
+    attack = [
+        ev("auth.log", "authentication_failure", i, src_ip="192.0.2.77", user="root")
+        for i in range(15)
+    ]
+    result = settle_stage(said("attempt", "Credential Access"), backup_logons() + attack, ASSETS)
+    assert result.attack_stage == "attempt"
+    assert "bkp-01" in result.evidence_note
+
+
 def test_the_inventory_is_off_when_no_file_is_set():
     assert load_inventory("") == ()
 

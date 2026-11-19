@@ -93,9 +93,14 @@ def test_a_few_typos_then_a_login_is_not_an_incident():
     events = failures(ip="10.0.3.34", n=3) + [
         ev("auth.log", "authentication_success", 30, src_ip="10.0.3.34")
     ]
-    result = settle_stage(said("success", "Credential Access"), events)
+    told = said("success", "Credential Access").model_copy(
+        update={"summary": "Brute force succeeded.", "suggested_actions": ["Isolate the host"]}
+    )
+    result = settle_stage(told, events)
     assert (result.is_incident, result.severity, result.mitre_tactic) == (False, 1, None)
     assert result.evidence_note.startswith("Not an incident")
+    # The model's attack story and containment steps do not survive the veto.
+    assert (result.summary, result.suggested_actions) == (result.evidence_note, [])
 
 
 def test_cdn_hostnames_are_not_a_dns_tunnel():

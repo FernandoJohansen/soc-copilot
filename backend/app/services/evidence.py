@@ -250,6 +250,13 @@ def settle_stage(
     evidence = findings([e for e in events if not routine_owner(e, assets)])
     aside = _set_aside(events, assets)
     if not evidence and _all_known(events):
+        note = (
+            f"Not an incident: the model said {result.attack_stage}, but the events "
+            "show no attack step (no repeated failed logins, scan, suspicious email, "
+            "download, spread between hosts or DNS tunnel)." + aside
+        )
+        # The model's narrative and containment steps describe the attack it saw; under a
+        # "not an incident" verdict they would tell the analyst to act on nothing.
         return result.model_copy(
             update={
                 "is_incident": False,
@@ -258,11 +265,9 @@ def settle_stage(
                 "mitre_tactic": None,
                 "mitre_technique_id": None,
                 "mitre_technique_name": None,
-                "evidence_note": (
-                    f"Not an incident: the model said {result.attack_stage}, but the events "
-                    "show no attack step (no repeated failed logins, scan, suspicious email, "
-                    "download, spread between hosts or DNS tunnel)." + aside
-                ),
+                "summary": note,
+                "suggested_actions": [],
+                "evidence_note": note,
             }
         )
     tactic = (result.mitre_tactic or "").strip().lower()
@@ -281,9 +286,12 @@ def settle_stage(
 
     settled = STAGES[stage]
     if settled == result.attack_stage:
-        if result.severity == STAGE_SEVERITY[settled]:
+        update: dict[str, Any] = {"severity": STAGE_SEVERITY[settled]}
+        if aside:
+            update["evidence_note"] = aside.strip()
+        if result.severity == update["severity"] and not aside:
             return result
-        return result.model_copy(update={"severity": STAGE_SEVERITY[settled]})
+        return result.model_copy(update=update)
     strongest = max(evidence, key=lambda f: _rank(f.stage), default=None)
     shown = strongest.what if strongest else "no attack step beyond the activity itself"
     note = f"Stage set to {settled} from {result.attack_stage}: the events show {shown}."
