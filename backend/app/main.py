@@ -8,10 +8,13 @@ from app.api.v1 import analyze, events, incidents, metrics
 from app.core import demo
 from app.core.config import settings
 from app.core.database import init_db
+from app.services.assets import load_inventory
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    # A missing or malformed inventory stops the API here, not on the first analysis.
+    load_inventory(settings.asset_inventory)
     await init_db()
     if settings.auto_seed:
         from scripts.seed_mitre import seed_if_empty

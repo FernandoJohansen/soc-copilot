@@ -125,6 +125,12 @@ def test_an_asset_without_accounts_is_rejected():
         parse_inventory(bad)
 
 
+def test_an_asset_without_an_ip_is_rejected_by_name():
+    bad = {"assets": [{"name": "bkp-01", "accounts": ["a"], "routine": ["auth.log/x"]}]}
+    with pytest.raises(ValueError, match="bkp-01"):
+        parse_inventory(bad)
+
+
 def test_the_synthetic_inventory_excuses_no_event_of_any_attack():
     golden = json.loads((Path(__file__).parent / "evals" / "golden_labels.json").read_text())
     attacks = [e for e in golden if e["expected"]["is_incident"]]

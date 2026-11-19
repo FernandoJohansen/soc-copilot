@@ -67,6 +67,8 @@ def _kind(text: str) -> tuple[str, str]:
 def parse_inventory(data: dict[str, Any]) -> tuple[Asset, ...]:
     assets = []
     for item in data.get("assets", []):
+        if not item.get("name") or not item.get("ip"):
+            raise ValueError(f"every asset needs a name and an ip, got {item!r}")
         if not item.get("accounts") or not item.get("routine"):
             raise ValueError(f"asset {item.get('name')!r} needs accounts and routine")
         assets.append(
