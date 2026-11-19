@@ -116,12 +116,12 @@ O projeto inteiro está nesta pasta (reconstruído aqui a partir deste documento
 6. `python scripts/generate_logs.py` — gera logs sintéticos dos 5 cenários
 7. `uvicorn app.main:app --reload` — sobe a API na porta 8000
 8. Testar: `curl -X POST http://localhost:8000/api/v1/analyze -H 'Content-Type: application/json' -d '{"event_ids": [1,2,3]}'`
-9. Rodar testes: `pytest -v` (72 testes unitários devem passar)
+9. Rodar testes: `pytest -v` (86 testes unitários devem passar)
 10. Rodar evals: `pytest backend/tests/evals -m eval -v` na raiz (gera `evals/results.json`; a parte do agente precisa do Ollama no ar ou de uma API key; com o qwen2.5:7b em CPU são 68 chamadas e de 2 a 4 horas)
 
 As Fases 1 a 4 estão implementadas. O que falta, em ordem:
 
-1. Tratar os 7 falsos positivos restantes (3 credenciais vencidas de CI, 4 jobs de backup). Os eventos não os separam dos ataques; a saída é um inventário de ativos (servidores de backup, runners de CI, monitoramento) que o código ou o prompt consulta, não nomes fixos no código.
+1. Medir o inventário de ativos numa rodada real. Feito em código (`services/assets.py`, `ASSET_INVENTORY`): no replay, os 7 falsos positivos restantes (3 credenciais vencidas de CI, 4 jobs de backup) somem e nenhum ataque muda; um teste garante que o inventário não põe de lado nenhum evento de ataque do dataset.
 2. Rodar uma vez com Claude para ter latência e custo reais; nenhum modelo local em CPU chega aos 10 s.
 3. Escolher o host, fazer o deploy e gravar o GIF.
 4. Adicionar o badge do CI e o LLM-as-judge.
@@ -152,12 +152,13 @@ As Fases 1 a 4 estão implementadas. O que falta, em ordem:
 | `backend/app/services/llm.py` | Providers LLM (Ollama, Claude, OpenAI) + factory |
 | `backend/app/services/severity.py` | Política de gravidade e mapa estágio → gravidade |
 | `backend/app/services/evidence.py` | Checagem de evidências: limita o estágio e veta falsos alarmes |
+| `backend/app/services/assets.py` + `app/data/synthetic_assets.json` | Inventário de ativos conhecidos: põe de lado a rotina do servidor de backup e do runner de CI |
 | `backend/app/services/cef.py` | Parser de linhas CEF |
 | `backend/app/core/demo.py` | Modo demo: API só leitura e limite de análises por IP e por dia |
 | `backend/app/services/sigma_rules.py` | 5 regras determinísticas de detecção |
 | `backend/scripts/generate_logs.py` | Gerador de 5 cenários de logs sintéticos |
 | `backend/scripts/seed_mitre.py` | Seed de 15 técnicas ATT&CK com embeddings |
-| `backend/tests/test_*.py` | 72 testes unitários (parsing do LLM, demo, evidências, schemas, sigma, logs, health) |
+| `backend/tests/test_*.py` | 86 testes unitários (parsing do LLM, demo, evidências, schemas, sigma, logs, health) |
 | `backend/app/services/correlation.py` | Agrupa eventos por IP, usuário e janela de tempo |
 | `backend/app/services/analysis.py` | Orquestração: RAG + Sigma + LLM + persistência |
 | `backend/scripts/build_golden.py` | Gera `tests/evals/golden_labels.json` a partir dos geradores |
@@ -214,6 +215,7 @@ Quem for gerar código para as Fases 3 e 4 precisa seguir estes padrões já est
 - Achados: login depois de 5+ falhas do mesmo IP, download, uma origem alcançando outros hosts, formato de túnel DNS (exceto CDNs), e-mail com domínio novo ou SPF falho sem relay de lista, varredura de 10+ alvos
 - O estágio fica limitado ao maior achado; Discovery para em reconhecimento; Lateral Movement e Exfiltration com evidência sobem para sucesso; sem nenhum achado, o incidente é vetado
 - Limite e veto só valem quando todos os eventos são de tipos conhecidos (`KNOWN_KINDS`); com qualquer outro tipo, a resposta do modelo passa
+- Antes das checagens, saem os eventos que são rotina de um ativo do inventário (`ASSET_INVENTORY`, vazio por padrão): IP de origem, nome do host, conta e tipo de evento precisam bater. O nome do ativo vai para o `evidence_note`
 
 **Regras Sigma (baseline)**
 
@@ -311,13 +313,13 @@ soc-copilot/
 │   │   ├── core/             # config, database
 │   │   ├── models/           # SQLAlchemy (Event, Incident, MitreTechnique)
 │   │   ├── schemas/          # Pydantic (event, incident, analysis)
-│   │   ├── services/         # rag, llm, sigma_rules, severity, evidence, correlation, analysis
+│   │   ├── services/         # rag, llm, sigma_rules, severity, evidence, assets, correlation, analysis
 │   │   └── main.py
 │   ├── scripts/
 │   │   ├── generate_logs.py  # 5 cenários sintéticos
 │   │   └── seed_mitre.py     # 15 técnicas ATT&CK com embeddings
 │   ├── tests/
-│   │   ├── test_*.py         # unitários (72 testes passando)
+│   │   ├── test_*.py         # unitários (86 testes passando)
 │   │   └── evals/            # golden labels + DeepEval
 │   ├── Dockerfile
 │   └── requirements.txt
@@ -374,4 +376,4 @@ O maior risco é o custo e a qualidade do LLM com volumes grandes de log. Por is
 - [x] Quando entra o agrupamento automático de eventos em incidentes? **Decidido:** já implementado (`POST /api/v1/analyze/auto`), agrupando por IP, usuário e janela de tempo.
 - [x] Incluir parsers de logs reais de firewall no MVP? **Decidido:** não, ficam para v2. O cenário de port scan usa eventos sintéticos com `source="firewall"`. MVP usa 5 cenários: brute force SSH, port scan, phishing, lateral movement, DNS exfiltration.
 - [x] Quanto tempo por semana? O roadmap original assumia 10h/semana. Fases 1 a 4 implementadas.
-- [ ] Como tratar os falsos positivos que os eventos não explicam (backup, CI)? Proposta: um inventário de ativos conhecidos, consultado pelo código ou pelo prompt.
+- [x] Como tratar os falsos positivos que os eventos não explicam (backup, CI)? **Decidido:** inventário de ativos consultado pelo código, não pelo prompt, porque dá para medir por replay e não depende de o modelo obedecer. Desligado por padrão: um inventário só serve para a rede que descreve.
