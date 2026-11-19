@@ -59,6 +59,8 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      # Known assets of the synthetic network the demo logs come from; unset it for real logs.
+      ASSET_INVENTORY: ${ASSET_INVENTORY-/app/app/data/synthetic_assets.json}
     extra_hosts:
       # lets the container reach an Ollama server running on the host instead
       - "host.docker.internal:host-gateway"

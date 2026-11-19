@@ -42,6 +42,8 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-claude}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
       CORS_ORIGINS: '["https://${DOMAIN}"]'
+      # Known assets of the synthetic network the demo logs come from; unset it for real logs.
+      ASSET_INVENTORY: ${ASSET_INVENTORY-/app/app/data/synthetic_assets.json}
     volumes:
       - ./evals:/evals:ro
     depends_on:

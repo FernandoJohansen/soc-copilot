@@ -8,9 +8,11 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.models import Event, Incident
 from app.schemas.analysis import AnalysisResult, AnalyzeResponse, AutoAnalyzeResponse
 from app.schemas.event import EventCreate
+from app.services.assets import load_inventory
 from app.services.correlation import group_events
 from app.services.evidence import settle_stage
 from app.services.llm import (
@@ -66,7 +68,7 @@ async def analyze_events(
         response = await provider.analyze(
             format_events(events), format_mitre_context(mitre_context)
         )
-        llm_result = settle_stage(response.result, events)
+        llm_result = settle_stage(response.result, events, load_inventory(settings.asset_inventory))
         llm_usage = response.usage
     except LLMError as e:
         llm_error = str(e)

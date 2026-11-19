@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     demo_analyses_per_day: int = 200
     demo_max_events: int = 500
 
+    # JSON file of known assets whose routine work is not evidence of an attack (see
+    # services/assets.py). Empty means none: an inventory only fits the network it describes.
+    asset_inventory: str = ""
+
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     eval_results_path: str = str(REPO_ROOT / "evals" / "results.json")
     cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]

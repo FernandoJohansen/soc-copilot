@@ -13,7 +13,9 @@ attacks; that is the model's job. They answer two narrower questions:
 
 The checks are deliberately loose: a benign backup job passes the lateral-movement check.
 A loose check only lets the model's answer through, while a strict one would overrule it
-on real attacks.
+on real attacks. What tells the backup job apart is knowing the network, not the events:
+events that are the routine work of a known asset (services/assets.py) are set aside
+before the checks run.
 """
 
 from collections import defaultdict
@@ -23,6 +25,7 @@ from datetime import datetime
 from typing import Any
 
 from app.schemas.analysis import AnalysisResult
+from app.services.assets import Asset, routine_owner
 from app.services.severity import STAGE_SEVERITY
 
 EventDict = dict[str, Any]
@@ -205,9 +208,22 @@ def _rank(stage: str | None) -> int:
     return STAGES.index(stage) if stage in STAGES else -1
 
 
-def settle_stage(result: AnalysisResult, events: Sequence[EventDict]) -> AnalysisResult:
+def _set_aside(events: Sequence[EventDict], assets: Sequence[Asset]) -> str:
+    """Name the known assets whose routine work is among the events, for the note."""
+    owners = {a.name: a.role for e in events if (a := routine_owner(e, assets))}
+    if not owners:
+        return ""
+    named = ", ".join(f"{name} ({role})" if role else name for name, role in sorted(owners.items()))
+    return f" Set aside as routine work of known assets: {named}."
+
+
+def settle_stage(
+    result: AnalysisResult, events: Sequence[EventDict], assets: Sequence[Asset] = ()
+) -> AnalysisResult:
     """Hold the model's verdict and attack stage to what the events show, and re-derive
     the severity.
+
+    Events that are the routine work of one of `assets` do not count as evidence.
 
     Returns the result unchanged when it is not an incident or has no stage (the Sigma
     baseline, an unparseable answer); otherwise a copy with the corrections and an
@@ -215,7 +231,8 @@ def settle_stage(result: AnalysisResult, events: Sequence[EventDict]) -> Analysi
     """
     if not result.is_incident or _rank(result.attack_stage) < 0:
         return result
-    evidence = findings(events)
+    evidence = findings([e for e in events if not routine_owner(e, assets)])
+    aside = _set_aside(events, assets)
     if not evidence and _all_known(events):
         return result.model_copy(
             update={
@@ -228,7 +245,7 @@ def settle_stage(result: AnalysisResult, events: Sequence[EventDict]) -> Analysi
                 "evidence_note": (
                     f"Not an incident: the model said {result.attack_stage}, but the events "
                     "show no attack step (no repeated failed logins, scan, suspicious email, "
-                    "download, spread between hosts or DNS tunnel)."
+                    "download, spread between hosts or DNS tunnel)." + aside
                 ),
             }
         )
@@ -262,6 +279,6 @@ def settle_stage(result: AnalysisResult, events: Sequence[EventDict]) -> Analysi
         update={
             "attack_stage": settled,
             "severity": STAGE_SEVERITY[settled],
-            "evidence_note": note,
+            "evidence_note": note + aside,
         }
     )
