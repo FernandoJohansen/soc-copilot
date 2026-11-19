@@ -109,6 +109,16 @@ def test_an_attack_beside_routine_work_is_judged_on_the_attack_alone():
     assert "bkp-01" in result.evidence_note
 
 
+def test_routine_set_aside_is_noted_even_when_the_stage_stands():
+    attack = [
+        ev("auth.log", "authentication_failure", i, src_ip="192.0.2.77", user="root")
+        for i in range(15)
+    ]
+    result = settle_stage(said("attempt", "Credential Access"), backup_logons() + attack, ASSETS)
+    assert result.attack_stage == "attempt"
+    assert "bkp-01" in result.evidence_note
+
+
 def test_the_inventory_is_off_when_no_file_is_set():
     assert load_inventory("") == ()
 
@@ -122,6 +132,12 @@ def test_routine_entries_must_name_source_and_event_type():
 def test_an_asset_without_accounts_is_rejected():
     bad = {"assets": [{"name": "x", "ip": "1.2.3.4", "routine": ["auth.log/x"]}]}
     with pytest.raises(ValueError):
+        parse_inventory(bad)
+
+
+def test_an_asset_without_an_ip_is_rejected_by_name():
+    bad = {"assets": [{"name": "bkp-01", "accounts": ["a"], "routine": ["auth.log/x"]}]}
+    with pytest.raises(ValueError, match="bkp-01"):
         parse_inventory(bad)
 
 

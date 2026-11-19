@@ -8,3 +8,5 @@ __pycache__/
 node_modules/
 dist/
 data/
+# Shipped data the backend reads (the synthetic asset inventory), not generated output.
+!backend/app/data/

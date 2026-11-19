@@ -137,13 +137,22 @@ def _scan(events: Sequence[EventDict]) -> Finding | None:
     return None
 
 
+def _days(value: Any) -> float | None:
+    """A domain age from raw log data, which may carry it as a string; None if unreadable."""
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _suspicious_email(events: Sequence[EventDict]) -> Finding | None:
     """A delivered email with a phishing sign: a young sender domain, or SPF failing on a
     message that was not relayed by a mailing list (relaying breaks SPF). An email with
     neither field known still counts: absent data should not clear it."""
     for e in _of(events, "email_gateway", "email_received"):
-        age, spf = _raw(e, "sender_domain_age_days"), _raw(e, "spf")
+        age, spf = _days(_raw(e, "sender_domain_age_days")), _raw(e, "spf")
         young = age is None or age < YOUNG_DOMAIN_DAYS
+        spf = str(spf).strip().lower() if spf is not None else None
         spf_fails = spf in (None, "fail", "softfail") and not _raw(e, "via")
         if young or spf_fails:
             sender = _raw(e, "sender") or "an unknown sender"
@@ -177,6 +186,13 @@ def _internal_spread(events: Sequence[EventDict]) -> Finding | None:
     return None
 
 
+def _under(domain: str, parents: Sequence[str]) -> bool:
+    """Whether `domain` is one of `parents` or a subdomain of one: evilcloudfront.net is not
+    under cloudfront.net."""
+    domain = domain.lower().rstrip(".")
+    return any(domain == p or domain.endswith("." + p) for p in parents)
+
+
 def _dns_tunnel_shape(events: Sequence[EventDict]) -> Finding | None:
     """Many distinct names under one domain from one host: what a DNS tunnel looks like."""
     names: dict[tuple[str, str], set[str]] = defaultdict(set)
@@ -184,7 +200,7 @@ def _dns_tunnel_shape(events: Sequence[EventDict]) -> Finding | None:
         key = (str(_raw(e, "src_ip")), str(_raw(e, "domain")))
         names[key].add(str(_raw(e, "query")))
     for (ip, domain), queries in names.items():
-        if domain.endswith(CDN_DOMAINS):
+        if _under(domain, CDN_DOMAINS):
             continue
         if len(queries) >= MIN_TUNNEL_QUERIES:
             return Finding(
@@ -234,6 +250,13 @@ def settle_stage(
     evidence = findings([e for e in events if not routine_owner(e, assets)])
     aside = _set_aside(events, assets)
     if not evidence and _all_known(events):
+        note = (
+            f"Not an incident: the model said {result.attack_stage}, but the events "
+            "show no attack step (no repeated failed logins, scan, suspicious email, "
+            "download, spread between hosts or DNS tunnel)." + aside
+        )
+        # The model's narrative and containment steps describe the attack it saw; under a
+        # "not an incident" verdict they would tell the analyst to act on nothing.
         return result.model_copy(
             update={
                 "is_incident": False,
@@ -242,11 +265,9 @@ def settle_stage(
                 "mitre_tactic": None,
                 "mitre_technique_id": None,
                 "mitre_technique_name": None,
-                "evidence_note": (
-                    f"Not an incident: the model said {result.attack_stage}, but the events "
-                    "show no attack step (no repeated failed logins, scan, suspicious email, "
-                    "download, spread between hosts or DNS tunnel)." + aside
-                ),
+                "summary": note,
+                "suggested_actions": [],
+                "evidence_note": note,
             }
         )
     tactic = (result.mitre_tactic or "").strip().lower()
@@ -265,9 +286,12 @@ def settle_stage(
 
     settled = STAGES[stage]
     if settled == result.attack_stage:
-        if result.severity == STAGE_SEVERITY[settled]:
+        update: dict[str, Any] = {"severity": STAGE_SEVERITY[settled]}
+        if aside:
+            update["evidence_note"] = aside.strip()
+        if result.severity == update["severity"] and not aside:
             return result
-        return result.model_copy(update={"severity": STAGE_SEVERITY[settled]})
+        return result.model_copy(update=update)
     strongest = max(evidence, key=lambda f: _rank(f.stage), default=None)
     shown = strongest.what if strongest else "no attack step beyond the activity itself"
     note = f"Stage set to {settled} from {result.attack_stage}: the events show {shown}."
