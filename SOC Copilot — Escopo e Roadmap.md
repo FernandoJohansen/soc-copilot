@@ -86,14 +86,14 @@ Esta tabela é a fonte única das metas; o roadmap aponta para ela.
 | Acerto de gravidade | Gravidade igual à do rótulo | ≥ 75% | Fase 3 | 98% ✅ |
 | Acerto de tática ATT&CK | Tática igual à do rótulo | ≥ 70% | Fase 3 | 72% ✅ |
 | Acerto de técnica ATT&CK | ID da técnica igual ao do rótulo | ≥ 65% | Fase 3 | 72% ✅ |
-| Latência p95 | Tempo de uma chamada ao `/analyze` (um incidente) | < 10 s | Fase 3 | 341 s ❌ (CPU) |
+| Latência p95 | Tempo de uma chamada ao `/analyze` (um incidente) | < 10 s | Fase 3 | 330 s ❌ (CPU) |
 | Custo | Dólares por incidente analisado | Registrar e reduzir | Fase 3 | $0 (modelo local) |
 | Recall de detecção | Ataques reais que o sistema encontrou | ≥ 90% | Fase 3 (medido, sem gate no CI) | 98% ✅ |
-| Precisão de detecção | Alertas que eram ataques de verdade | ≥ 80% | Fase 3 (medido, sem gate no CI) | 86% ✅ (7 falsos positivos) |
+| Precisão de detecção | Alertas que eram ataques de verdade | ≥ 80% | Fase 3 (medido, sem gate no CI) | 100% ✅ (0 falsos positivos) |
 | Qualidade da explicação | Nota de 1 a 5 dada por LLM-as-judge com rubrica | ≥ 4,0 | Depois da primeira rodada | Não medido |
 | Latência em lote | Tempo para analisar 1.000 eventos | ≤ 30 s | Ainda não medido | Não medido |
 
-A "última rodada real" é o qwen2.5:7b em CPU de 19 nov 2026, medindo o commit `c232644` (o limite de estágio e o veto aos grupos sem passo de ataque). O veto levou os falsos positivos de 18 para 7 e a precisão de 70% para 86%, exatamente o que o replay previa; o resto não mudou. Sem o limite de estágio, a gravidade era 65%. As checagens foram escritas olhando o dataset, então o número honesto é o do conjunto de teste separado: gravidade de 9 em 10, precisão de 90% e 1 falso positivo nas 5 entradas benignas.
+A "última rodada real" é o qwen2.5:7b em CPU de 19 nov 2026, medindo o commit `a3ea0c2` (limite de estágio, veto aos grupos sem passo de ataque e inventário de ativos). Os falsos positivos caíram de 18 para 7 com o veto e de 7 para 0 com o inventário, nas duas vezes exatamente o que o replay previa; o resto não mudou. Sem o limite de estágio, a gravidade era 65%. As checagens e o inventário foram escritos olhando o dataset, então o número honesto é o do conjunto de teste separado (gravidade de 9 em 10, 0 falsos positivos nas 5 entradas benignas), e mesmo ele é otimista: o inventário cobre exatamente os dois jobs benignos que o gerador cria. Os 12 erros que sobram são de tática (port scan e phishing puxados para Lateral Movement, Exfiltration ou Credential Access) e um password spray que o modelo deixou passar.
 
 O `AnalysisResult` tem o campo `is_incident`, então o agente pode responder "não é incidente" e o falso positivo é medido nas 24 entradas benignas do dataset. As metas são um ponto de partida e devem ser revistas depois da primeira rodada.
 
@@ -121,10 +121,9 @@ O projeto inteiro está nesta pasta (reconstruído aqui a partir deste documento
 
 As Fases 1 a 4 estão implementadas. O que falta, em ordem:
 
-1. Medir o inventário de ativos numa rodada real. Feito em código (`services/assets.py`, `ASSET_INVENTORY`): no replay, os 7 falsos positivos restantes (3 credenciais vencidas de CI, 4 jobs de backup) somem e nenhum ataque muda; um teste garante que o inventário não põe de lado nenhum evento de ataque do dataset.
-2. Rodar uma vez com Claude para ter latência e custo reais; nenhum modelo local em CPU chega aos 10 s.
-3. Escolher o host, fazer o deploy e gravar o GIF.
-4. Adicionar o badge do CI e o LLM-as-judge.
+1. Rodar uma vez com Claude para ter latência e custo reais; nenhum modelo local em CPU chega aos 10 s.
+2. Escolher o host, fazer o deploy e gravar o GIF.
+3. Adicionar o badge do CI e o LLM-as-judge.
 
 ### Arquivos já construídos (referência)
 
@@ -270,7 +269,7 @@ Quem for gerar código para as Fases 3 e 4 precisa seguir estes padrões já est
 
 ### Fase 3 — Evals e CI ✅ IMPLEMENTADA (metas em parte atingidas)
 
-**Estado em 18 nov 2026:** o agente já rodou nos evals com qwen2.5:3b e qwen2.5:7b em CPU, e os números estão no README. Na última rodada real (19 nov), com o limite de estágio e o veto, gravidade (98%), tática (72%), técnica (72%), recall (98%) e precisão (86%) batem a meta; só a latência (341 s) não. A latência só cai com GPU ou modelo hospedado.
+**Estado em 19 nov 2026:** o agente já rodou nos evals com qwen2.5:3b e qwen2.5:7b em CPU, e os números estão no README. Na última rodada real (19 nov), com o limite de estágio, o veto e o inventário de ativos, gravidade (98%), tática (72%), técnica (72%), recall (98%) e precisão (100%) batem a meta; só a latência (330 s) não. A latência só cai com GPU ou modelo hospedado.
 
 
 - **3.1 — Golden dataset** `backend/tests/evals/golden_labels.json`: criar arquivo JSON com 50–100 incidentes rotulados. Cada entrada tem: lista de eventos (raw logs), severidade esperada (1–4), tática MITRE esperada, técnica MITRE esperada. Usar os 5 cenários de `generate_logs.py` como base e adicionar variações (thresholds diferentes, combinações, falsos positivos deliberados). Separar 20% das entradas como conjunto de teste.
