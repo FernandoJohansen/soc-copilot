@@ -12,13 +12,13 @@ An LLM agent that turns a batch of security logs into a short list of explained 
 | Metric | Sigma-style rules | LLM agent (qwen2.5:7b) | Target |
 | --- | ---: | ---: | ---: |
 | Detection recall | 56% | 98% |  |
-| Detection precision | 65% | 86% |  |
+| Detection precision | 65% | 100% |  |
 | Severity accuracy | 56% | 98% | ≥ 75% |
 | ATT&CK tactic accuracy | 56% | 72% | ≥ 70% |
 | ATT&CK technique accuracy | 56% | 72% | ≥ 65% |
-| False positives on benign activity | 13 of 24 | 7 of 24 | |
+| False positives on benign activity | 13 of 24 | 0 of 24 | |
 | Detection recall on evasive attacks | 0% | 95% | |
-| Latency p95 per analysis | 0.5 ms | 340.8 s | < 10 s |
+| Latency p95 per analysis | 0.7 ms | 330.2 s | < 10 s |
 | LLM cost per analysis | $0 | $0.0000 | |
 
 67 labelled entries: 43 attacks and 24 benign, 15 of them held out. Accuracy is over the attack entries, and a missed attack counts as wrong. Agent run: 2026-11-19.
@@ -157,10 +157,10 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - The agent suggests actions and never executes them.
 - Redis is in the stack but not used yet.
 - The default local model is small (3 billion parameters) and slow on CPU, well over the 10-second latency target. A hosted model or a GPU changes both.
-- False positives: 7 of 24 benign entries (1 of the 5 held-out ones). The veto on groups with no attack step brought them down from 18. The 7 left (a CI runner with an expired key, the backup job) look the same as the attacks in the events; replaying them through the asset inventory clears all 7 with no attack changed, but a full run has not confirmed it yet. The inventory was written for these two jobs, so it shows the mechanism works, not that it generalizes.
+- False positives: 0 of 24 benign entries, down from 18 with the veto on groups with no attack step and then 7 with the asset inventory. The last 7 (a CI runner with an expired key, the backup job) look the same as the attacks in the events, and only the inventory separates them. It was written for these two jobs, so 100% precision shows the mechanism works, not that it generalizes: a network with other routine jobs needs its own inventory.
 - The evidence checks were written with the dataset in view, so the held-out entries are the fairer measure: severity 9 of 10 there.
 - The attack stage still pulls some tactics toward Lateral Movement (tactic accuracy 72%, down from 77% before the stage was added).
 
 ## Next steps
 
-Measure the asset inventory in a full run, run once on a hosted model for real latency and cost, deploy a public demo, add an LLM-as-judge score for explanation quality, then replace the synthetic dataset with attacks captured in a lab.
+Run once on a hosted model for real latency and cost, deploy a public demo, add an LLM-as-judge score for explanation quality, then replace the synthetic dataset with attacks captured in a lab.
