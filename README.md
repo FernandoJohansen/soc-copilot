@@ -12,16 +12,16 @@ An LLM agent that turns a batch of security logs into a short list of explained 
 | Metric | Sigma-style rules | LLM agent (qwen2.5:7b) | Target |
 | --- | ---: | ---: | ---: |
 | Detection recall | 56% | 98% |  |
-| Detection precision | 65% | 70% |  |
+| Detection precision | 65% | 86% |  |
 | Severity accuracy | 56% | 98% | ≥ 75% |
 | ATT&CK tactic accuracy | 56% | 72% | ≥ 70% |
 | ATT&CK technique accuracy | 56% | 72% | ≥ 65% |
-| False positives on benign activity | 13 of 24 | 18 of 24 | |
+| False positives on benign activity | 13 of 24 | 7 of 24 | |
 | Detection recall on evasive attacks | 0% | 95% | |
-| Latency p95 per analysis | 0.4 ms | 363.7 s | < 10 s |
+| Latency p95 per analysis | 0.5 ms | 340.8 s | < 10 s |
 | LLM cost per analysis | $0 | $0.0000 | |
 
-67 labelled entries: 43 attacks and 24 benign, 15 of them held out. Accuracy is over the attack entries, and a missed attack counts as wrong. Agent run: 2026-11-18.
+67 labelled entries: 43 attacks and 24 benign, 15 of them held out. Accuracy is over the attack entries, and a missed attack counts as wrong. Agent run: 2026-11-19.
 <!-- EVAL_RESULTS_END -->
 
 The table is generated from [`evals/results.json`](evals/results.json) by `python backend/scripts/update_readme.py`.
@@ -156,10 +156,10 @@ To rebuild the golden dataset after changing the generators: `python backend/scr
 - The agent suggests actions and never executes them.
 - Redis is in the stack but not used yet.
 - The default local model is small (3 billion parameters) and slow on CPU, well over the 10-second latency target. A hosted model or a GPU changes both.
-- False positives: 18 of 24 benign entries in the measured run. The veto on groups with no attack step came after that run; replaying the run's answers through it gives 7, but a full run has not confirmed it yet. The 7 left (a CI runner with an expired key, the backup job) look the same as the attacks in the events, and need an inventory of known assets rather than more checks.
+- False positives: 7 of 24 benign entries (1 of the 5 held-out ones). The veto on groups with no attack step brought them down from 18. The 7 left (a CI runner with an expired key, the backup job) look the same as the attacks in the events, and need an inventory of known assets rather than more checks.
 - The evidence checks were written with the dataset in view, so the held-out entries are the fairer measure: severity 9 of 10 there.
 - The attack stage still pulls some tactics toward Lateral Movement (tactic accuracy 72%, down from 77% before the stage was added).
 
 ## Next steps
 
-Measure the false-positive veto in a full run, add an inventory of known assets, run once on a hosted model for real latency and cost, deploy a public demo, add an LLM-as-judge score for explanation quality, then replace the synthetic dataset with attacks captured in a lab.
+Add an inventory of known assets, run once on a hosted model for real latency and cost, deploy a public demo, add an LLM-as-judge score for explanation quality, then replace the synthetic dataset with attacks captured in a lab.

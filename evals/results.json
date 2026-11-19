@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-18T06:26:36+00:00",
+  "generated_at": "2026-11-19T01:47:35+00:00",
   "dataset": {
     "entries": 67,
     "attacks": 43,
@@ -24,7 +24,7 @@
       "severity_accuracy": 0.5581,
       "tactic_accuracy": 0.5581,
       "technique_accuracy": 0.5581,
-      "latency_p95_ms": 0.4,
+      "latency_p95_ms": 0.5,
       "cost_per_incident_usd": 0.0,
       "errors": 0
     },
@@ -53,7 +53,7 @@
         "severity_accuracy": 1.0,
         "tactic_accuracy": 1.0,
         "technique_accuracy": 1.0,
-        "latency_p95_ms": 0.4,
+        "latency_p95_ms": 0.5,
         "cost_per_incident_usd": 0.0,
         "errors": 0
       },
@@ -608,12 +608,12 @@
       "attacks": 43,
       "benign": 24,
       "detection_recall": 0.9767,
-      "detection_precision": 0.7,
-      "false_positives": 18,
+      "detection_precision": 0.8571,
+      "false_positives": 7,
       "severity_accuracy": 0.9767,
       "tactic_accuracy": 0.7209,
       "technique_accuracy": 0.7209,
-      "latency_p95_ms": 363708.5,
+      "latency_p95_ms": 340790.7,
       "cost_per_incident_usd": 0.0,
       "errors": 0
     },
@@ -622,12 +622,12 @@
       "attacks": 10,
       "benign": 5,
       "detection_recall": 0.9,
-      "detection_precision": 0.6923,
-      "false_positives": 4,
+      "detection_precision": 0.9,
+      "false_positives": 1,
       "severity_accuracy": 0.9,
       "tactic_accuracy": 0.7,
       "technique_accuracy": 0.7,
-      "latency_p95_ms": 592529.5,
+      "latency_p95_ms": 528840.8,
       "cost_per_incident_usd": 0.0,
       "errors": 0
     },
@@ -642,7 +642,7 @@
         "severity_accuracy": 1.0,
         "tactic_accuracy": 0.6667,
         "technique_accuracy": 0.6667,
-        "latency_p95_ms": 364253.1,
+        "latency_p95_ms": 369379.8,
         "cost_per_incident_usd": 0.0,
         "errors": 0
       },
@@ -656,7 +656,7 @@
         "severity_accuracy": 0.9474,
         "tactic_accuracy": 0.7895,
         "technique_accuracy": 0.7895,
-        "latency_p95_ms": 415644.6,
+        "latency_p95_ms": 433338.1,
         "cost_per_incident_usd": 0.0,
         "errors": 0
       },
@@ -666,11 +666,11 @@
         "benign": 24,
         "detection_recall": null,
         "detection_precision": 0.0,
-        "false_positives": 18,
+        "false_positives": 7,
         "severity_accuracy": null,
         "tactic_accuracy": null,
         "technique_accuracy": null,
-        "latency_p95_ms": 265914.4,
+        "latency_p95_ms": 276107.1,
         "cost_per_incident_usd": 0.0,
         "errors": 0
       }
@@ -869,70 +869,6 @@
         "error": null
       },
       {
-        "id": "benign-password_typos-1",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "error": null
-      },
-      {
-        "id": "benign-password_typos-2",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "error": null
-      },
-      {
-        "id": "benign-password_typos-3",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "error": null
-      },
-      {
-        "id": "benign-password_typos-4",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "error": null
-      },
-      {
         "id": "benign-stale_ci_credential-1",
         "expected": {
           "is_incident": false,
@@ -977,22 +913,6 @@
           "severity": 3,
           "mitre_tactic": "Credential Access",
           "mitre_technique": "T1110"
-        },
-        "error": null
-      },
-      {
-        "id": "benign-forwarded_newsletter-2",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 3,
-          "mitre_tactic": "Initial Access",
-          "mitre_technique": "T1566"
         },
         "error": null
       },
@@ -1059,104 +979,8 @@
           "mitre_technique": "T1021"
         },
         "error": null
-      },
-      {
-        "id": "benign-cdn_hostnames-1",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Exfiltration",
-          "mitre_technique": "T1048"
-        },
-        "error": null
-      },
-      {
-        "id": "benign-cdn_hostnames-2",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 2,
-          "mitre_tactic": "Discovery",
-          "mitre_technique": "T1046"
-        },
-        "error": null
-      },
-      {
-        "id": "benign-cdn_hostnames-3",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 4,
-          "mitre_tactic": "Exfiltration",
-          "mitre_technique": "T1048"
-        },
-        "error": null
-      },
-      {
-        "id": "benign-ordinary_activity-1",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 2,
-          "mitre_tactic": "Lateral Movement",
-          "mitre_technique": "T1021"
-        },
-        "error": null
-      },
-      {
-        "id": "benign-ordinary_activity-2",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 2,
-          "mitre_tactic": "Credential Access",
-          "mitre_technique": "T1110"
-        },
-        "error": null
-      },
-      {
-        "id": "benign-ordinary_activity-3",
-        "expected": {
-          "is_incident": false,
-          "severity": 1,
-          "mitre_tactic": null,
-          "mitre_technique": null
-        },
-        "got": {
-          "is_incident": true,
-          "severity": 2,
-          "mitre_tactic": "Lateral Movement",
-          "mitre_technique": "T1021"
-        },
-        "error": null
       }
     ]
   },
-  "agent_generated_at": "2026-11-18T06:26:36+00:00"
+  "agent_generated_at": "2026-11-19T01:47:35+00:00"
 }

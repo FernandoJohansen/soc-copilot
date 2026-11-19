@@ -12,16 +12,16 @@ Um agente de LLM que transforma um lote de logs de segurança em uma lista curta
 | Métrica | Regras estilo Sigma | Agente LLM (qwen2.5:7b) | Meta |
 | --- | ---: | ---: | ---: |
 | Recall de detecção | 56% | 98% |  |
-| Precisão de detecção | 65% | 70% |  |
+| Precisão de detecção | 65% | 86% |  |
 | Acerto de gravidade | 56% | 98% | ≥ 75% |
 | Acerto de tática ATT&CK | 56% | 72% | ≥ 70% |
 | Acerto de técnica ATT&CK | 56% | 72% | ≥ 65% |
-| Falsos positivos em atividade benigna | 13 de 24 | 18 de 24 | |
+| Falsos positivos em atividade benigna | 13 de 24 | 7 de 24 | |
 | Recall de detecção em ataques evasivos | 0% | 95% | |
-| Latência p95 por análise | 0,4 ms | 363,7 s | < 10 s |
+| Latência p95 por análise | 0,5 ms | 340,8 s | < 10 s |
 | Custo de LLM por análise | $0 | $0,0000 | |
 
-67 entradas rotuladas: 43 ataques e 24 benignas, 15 delas separadas como conjunto de teste. O acerto é calculado sobre os ataques, e um ataque não detectado conta como erro. Rodada do agente: 2026-11-18.
+67 entradas rotuladas: 43 ataques e 24 benignas, 15 delas separadas como conjunto de teste. O acerto é calculado sobre os ataques, e um ataque não detectado conta como erro. Rodada do agente: 2026-11-19.
 <!-- EVAL_RESULTS_END -->
 
 A tabela é gerada a partir de [`evals/results.json`](evals/results.json) por `python backend/scripts/update_readme.py`, que atualiza este arquivo e a versão em inglês.
@@ -156,10 +156,10 @@ Para regenerar o dataset rotulado depois de mudar os geradores: `python backend/
 - O agente sugere ações e nunca as executa.
 - O Redis está na stack, mas ainda não é usado.
 - O modelo local padrão é pequeno (3 bilhões de parâmetros) e lento em CPU, bem acima da meta de 10 segundos de latência. Um modelo hospedado ou uma GPU mudam as duas coisas.
-- Falsos positivos: 18 das 24 entradas benignas na rodada medida. O veto aos grupos sem passo de ataque veio depois dessa rodada; passando as respostas dela por ele, sobram 7, mas uma rodada completa ainda não confirmou. Os 7 restantes (um runner de CI com chave vencida, o job de backup) são iguais aos ataques nos eventos e pedem um inventário de ativos conhecidos, não mais checagens.
+- Falsos positivos: 7 das 24 entradas benignas (1 das 5 separadas para teste). O veto aos grupos sem passo de ataque os trouxe de 18 para 7. Os 7 restantes (um runner de CI com chave vencida, o job de backup) são iguais aos ataques nos eventos e pedem um inventário de ativos conhecidos, não mais checagens.
 - As checagens de evidência foram escritas olhando o dataset, então o conjunto de teste separado é a medida mais justa: gravidade de 9 em 10 ali.
 - O estágio do ataque ainda puxa algumas táticas para Lateral Movement (acerto de tática de 72%, contra 77% antes do estágio).
 
 ## Próximos passos
 
-Medir o veto aos falsos positivos numa rodada completa, adicionar um inventário de ativos conhecidos, rodar uma vez com um modelo hospedado para ter latência e custo reais, publicar uma demo, adicionar uma nota de LLM-as-judge para a qualidade das explicações e, depois, trocar o dataset sintético por ataques capturados em laboratório.
+Adicionar um inventário de ativos conhecidos, rodar uma vez com um modelo hospedado para ter latência e custo reais, publicar uma demo, adicionar uma nota de LLM-as-judge para a qualidade das explicações e, depois, trocar o dataset sintético por ataques capturados em laboratório.
