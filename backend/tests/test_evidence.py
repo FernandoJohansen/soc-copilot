@@ -113,6 +113,25 @@ def test_cdn_hostnames_are_not_a_dns_tunnel():
     assert not settle_stage(said("success", "Exfiltration"), events).is_incident
 
 
+def test_a_domain_that_only_ends_like_a_cdn_is_still_a_dns_tunnel():
+    events = [
+        ev("dns", "query", i, src_ip="10.0.3.68", domain="exfilcloudfront.net", query=f"{i:x}q")
+        for i in range(30)
+    ]
+    result = settle_stage(said("success", "Exfiltration"), events)
+    assert (result.is_incident, result.attack_stage) == (True, "success")
+
+
+def test_email_fields_from_raw_json_are_read_leniently():
+    def email(**raw):
+        return [ev("email_gateway", "email_received", **raw), ev("proxy", "url_click", 60)]
+
+    as_text = email(spf="pass", sender_domain_age_days="4")
+    assert settle_stage(said("attempt", "Initial Access"), as_text).severity == 3
+    upper = email(spf="FAIL", sender_domain_age_days=3000)
+    assert settle_stage(said("attempt", "Initial Access"), upper).is_incident
+
+
 def test_email_from_an_old_domain_relayed_by_a_list_is_not_phishing():
     def email(**raw):
         return [ev("email_gateway", "email_received", **raw), ev("proxy", "url_click", 60)]
