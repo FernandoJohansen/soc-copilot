@@ -1,0 +1,19 @@
+{
+  "_comment": "Known assets of the synthetic network in scripts/generate_logs.py. Only for that network: point ASSET_INVENTORY at your own file elsewhere.",
+  "assets": [
+    {
+      "name": "bkp-01",
+      "ip": "10.0.0.20",
+      "role": "backup server",
+      "accounts": ["svc_backup"],
+      "routine": ["windows_security/logon", "windows_security/share_access"]
+    },
+    {
+      "name": "ci-runner-02",
+      "ip": "10.0.2.15",
+      "role": "CI runner that deploys over SSH",
+      "accounts": ["svc_deploy"],
+      "routine": ["auth.log/authentication_failure", "auth.log/authentication_success"]
+    }
+  ]
+}
